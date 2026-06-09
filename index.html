@@ -1,0 +1,2810 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StoryCraft Studio - PWA</title>
+    <!-- Tailwind CSS para um design elegante e ultra-moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons para interface moderna -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Bangers&family=Cinzel:wght@700&family=Creepster&family=Press+Start+2P&family=Shrikhand&family=Pacifico&family=Anton&family=Special+Elite&family=Dancing+Script&family=Rubik+Mono+One&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #09090b;
+            color: #f4f4f5;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Aspect ratio 9:16 robusto para celular/story */
+        .story-viewport {
+            aspect-ratio: 9/16;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25);
+            touch-action: none; /* Previne rolagem de página ao arrastar elementos no celular */
+        }
+
+        /* Custom scrollbar para visual limpo */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #18181b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a855f7;
+        }
+
+        /* Estilo do smartphone mock para o Preview */
+        .phone-container {
+            width: 360px;
+            height: 740px;
+            background: #000;
+            border: 12px solid #27272a;
+            border-radius: 48px;
+            position: relative;
+            box-shadow: 0 0 40px rgba(168, 85, 247, 0.4);
+            overflow: hidden;
+        }
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background: #27272a;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 50;
+        }
+        .phone-notch::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #09090b;
+            border-radius: 50%;
+            left: 20px;
+            top: 8px;
+        }
+        .phone-notch::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 4px;
+            background: #18181b;
+            border-radius: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 8px;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen select-none">
+
+    <!-- Header Principal -->
+    <header class="bg-zinc-900/90 backdrop-blur-md border-b border-zinc-800 px-4 py-3 flex items-center justify-between z-10 shrink-0">
+        <div class="flex items-center gap-2">
+            <div class="bg-gradient-to-tr from-purple-600 to-pink-500 p-1.5 rounded-xl">
+                <i data-lucide="sparkles" class="w-5 h-5 text-white animate-pulse"></i>
+            </div>
+            <div>
+                <h1 class="text-md font-extrabold tracking-tight bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                    STORYCRAFT
+                </h1>
+                <p class="text-[10px] text-zinc-400 font-medium">Estúdio Criativo Mobile</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="pwaInstallBtn" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-all">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Instalar
+            </button>
+            <button onclick="openBackupModal()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 p-2 rounded-lg transition-all" title="Backup / Restaurar">
+                <i data-lucide="database" class="w-4 h-4"></i>
+            </button>
+            <button onclick="openPhonePreview()" class="bg-zinc-800 hover:bg-zinc-700 text-purple-400 p-2 rounded-lg transition-all flex items-center gap-1.5" title="Visualização no Celular">
+                <i data-lucide="smartphone" class="w-4 h-4"></i>
+                <span class="text-xs font-semibold hidden sm:inline">Preview</span>
+            </button>
+            <button onclick="exportMedia()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold text-xs px-4 py-2 rounded-lg shadow-lg flex items-center gap-1.5 transition-all">
+                <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Exportar
+            </button>
+        </div>
+    </header>
+
+    <!-- Workspace Principal -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        
+        <!-- Área Central de Visualização (Canvas Story) -->
+        <div class="flex-1 bg-zinc-950 flex items-center justify-center p-4 relative overflow-y-auto">
+            <div class="story-viewport relative bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 flex items-center justify-center">
+                <!-- Canvas de renderização principal -->
+                <canvas id="storyCanvas" class="w-full h-full object-cover rounded-2xl"></canvas>
+                
+                <!-- Overlay de status e playback -->
+                <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-black/60 backdrop-blur-sm p-3 rounded-xl border border-white/10 text-white text-xs pointer-events-auto">
+                    <div class="flex items-center gap-2">
+                        <button id="btnPlayPause" onclick="togglePlayback()" class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center hover:scale-105 transition">
+                            <i data-lucide="play" id="playIcon" class="w-4 h-4 fill-white"></i>
+                        </button>
+                        <span id="audioStatusText" class="text-[11px] text-zinc-300 truncate max-w-[120px]">Sem trilha sonora</span>
+                    </div>
+                    <span id="videoDurationText" class="text-zinc-400 font-mono text-[10px]">00:00 / 01:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel de Controle Lateral (Tabs) -->
+        <aside class="w-full md:w-[400px] bg-zinc-900 border-t md:border-t-0 md:border-l border-zinc-800 flex flex-col h-[45vh] md:h-full shrink-0">
+            <!-- Navegação de Abas -->
+            <div class="flex border-b border-zinc-800 text-zinc-400 overflow-x-auto select-none shrink-0">
+                <button onclick="switchTab('media')" id="tabBtn-media" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-purple-500 text-purple-400">
+                    <i data-lucide="image" class="w-4 h-4"></i> Mídia
+                </button>
+                <button onclick="switchTab('text')" id="tabBtn-text" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent">
+                    <i data-lucide="component" class="w-4 h-4"></i> Elementos
+                </button>
+                <button onclick="switchTab('effects')" id="tabBtn-effects" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent">
+                    <i data-lucide="wand-2" class="w-4 h-4"></i> Filtros
+                </button>
+                <button onclick="switchTab('audio')" id="tabBtn-audio" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent">
+                    <i data-lucide="music" class="w-4 h-4"></i> Áudio
+                </button>
+                <button onclick="switchTab('projects')" id="tabBtn-projects" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent">
+                    <i data-lucide="folder-git-2" class="w-4 h-4"></i> Projetos
+                </button>
+            </div>
+
+            <!-- Conteúdo das Abas (Scrollável) -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                
+                <!-- ABA MÍDIA -->
+                <div id="tabContent-media" class="space-y-4">
+                    <!-- Templates Rápidos 1-Clique -->
+                    <div>
+                        <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">💡 Templates 1-Clique</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="applyPresetTemplate('retro-vhs')" class="bg-gradient-to-tr from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-purple-500 p-2.5 rounded-xl text-left transition">
+                                <span class="block text-xs font-bold text-zinc-100">📹 Retro VHS</span>
+                                <span class="text-[9px] text-zinc-500">Glitch analógico e filtro estético</span>
+                            </button>
+                            <button onclick="applyPresetTemplate('cyber-neon')" class="bg-gradient-to-tr from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-purple-500 p-2.5 rounded-xl text-left transition">
+                                <span class="block text-xs font-bold text-zinc-100">🌌 Cyber Neon</span>
+                                <span class="text-[9px] text-zinc-500">Laser 3D, neon e atmosfera retro</span>
+                            </button>
+                            <button onclick="applyPresetTemplate('boho-summer')" class="bg-gradient-to-tr from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-purple-500 p-2.5 rounded-xl text-left transition">
+                                <span class="block text-xs font-bold text-zinc-100">☀️ Boho Summer</span>
+                                <span class="text-[9px] text-zinc-500">Mínimo terroso, elegância e luz</span>
+                            </button>
+                            <button onclick="applyPresetTemplate('winter-snow')" class="bg-gradient-to-tr from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-purple-500 p-2.5 rounded-xl text-left transition">
+                                <span class="block text-xs font-bold text-zinc-100">❄️ Winter Magic</span>
+                                <span class="text-[9px] text-zinc-500">Nevasca suave e gradiente gelo</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-zinc-300 pt-2">Plano de Fundo</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer border-2 border-dashed border-zinc-700 hover:border-purple-500 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition bg-zinc-950/50">
+                            <input type="file" accept="image/*" class="hidden" onchange="handleMediaUpload(this, 'image')">
+                            <i data-lucide="image-plus" class="w-6 h-6 text-purple-400"></i>
+                            <span class="text-xs text-zinc-300 text-center">Subir Foto</span>
+                        </label>
+                        <label class="cursor-pointer border-2 border-dashed border-zinc-700 hover:border-pink-500 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition bg-zinc-950/50">
+                            <input type="file" accept="video/*" class="hidden" onchange="handleMediaUpload(this, 'video')">
+                            <i data-lucide="video" class="w-6 h-6 text-pink-400"></i>
+                            <span class="text-xs text-zinc-300 text-center">Subir Vídeo</span>
+                        </label>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs text-zinc-400 font-semibold block">Posição e Escala da Imagem/Vídeo</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[10px] text-zinc-500">Escala (Zoom)</span>
+                                <input type="range" min="0.5" max="3" step="0.05" value="1" oninput="updateMediaScale(this.value)" class="w-full accent-purple-500 bg-zinc-800 rounded-lg">
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-zinc-500">Ajuste Vertical</span>
+                                <input type="range" min="-300" max="300" step="1" value="0" oninput="updateMediaOffset(this.value)" class="w-full accent-purple-500 bg-zinc-800 rounded-lg">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Galeria de Imagens de Demonstração Rápidas -->
+                    <div class="space-y-2">
+                        <span class="text-xs text-zinc-400 font-semibold block">Ou use uma cor sólida</span>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="setSolidBackground('#18181b')" class="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900"></button>
+                            <button onclick="setSolidBackground('#a855f7')" class="w-8 h-8 rounded-full border border-zinc-700 bg-purple-500"></button>
+                            <button onclick="setSolidBackground('#ec4899')" class="w-8 h-8 rounded-full border border-zinc-700 bg-pink-500"></button>
+                            <button onclick="setSolidBackground('#3b82f6')" class="w-8 h-8 rounded-full border border-zinc-700 bg-blue-500"></button>
+                            <button onclick="setSolidBackground('#ef4444')" class="w-8 h-8 rounded-full border border-zinc-700 bg-red-500"></button>
+                            <button onclick="setSolidBackground('gradient')" class="w-8 h-8 rounded-full border border-zinc-700 bg-gradient-to-tr from-purple-600 to-pink-500" title="Gradiente Neon"></button>
+                        </div>
+                    </div>
+
+                    <!-- DURAÇÃO AJUSTÁVEL DO STORY (ATÉ 60 SEGUNDOS) -->
+                    <div class="space-y-2 pt-3 border-t border-zinc-800/80">
+                        <label class="text-xs text-zinc-400 font-semibold block">⏱️ Duração do Story (Vídeo)</label>
+                        <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-850 flex items-center justify-between gap-3">
+                            <input type="range" id="storyDurationSlider" min="5" max="60" step="5" value="60" oninput="updateStoryDuration(this.value)" class="flex-1 accent-purple-500 bg-zinc-800 rounded-lg">
+                            <span id="storyDurationVal" class="text-xs font-mono font-bold text-purple-400 min-w-[35px] text-right">60s</span>
+                        </div>
+                        <p class="text-[9px] text-zinc-500">Ajuste de 5 a 60 segundos. Ideal para WhatsApp (até 30s) ou TikTok/Reels/Vídeos de 1 minuto (até 60s).</p>
+                    </div>
+                </div>
+
+                <!-- ABA ELEMENTOS (TEXTO E STICKERS) -->
+                <div id="tabContent-text" class="hidden space-y-4">
+                    <div class="flex gap-2">
+                        <button onclick="switchElementSubTab('texts')" id="btnSub-texts" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-purple-600 text-white">
+                            📝 Textos
+                        </button>
+                        <button onclick="switchElementSubTab('stickers')" id="btnSub-stickers" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-zinc-800 text-zinc-400 hover:text-zinc-200">
+                            🧸 Stickers & Formas
+                        </button>
+                    </div>
+
+                    <!-- SUB-ABA TEXTOS -->
+                    <div id="subContent-texts" class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Gerenciar Textos</h3>
+                            <button onclick="addNewText()" class="text-xs bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Novo Texto
+                            </button>
+                        </div>
+                        <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+                            <p class="text-[10px] text-purple-400 font-semibold flex items-center gap-1">
+                                <i data-lucide="info" class="w-3.5 h-3.5"></i> Dica: Arraste e redimensione os textos diretamente na tela!
+                            </p>
+                        </div>
+                        <!-- Lista de Textos Ativos -->
+                        <div id="activeTextsList" class="space-y-3"></div>
+                    </div>
+
+                    <!-- SUB-ABA STICKERS -->
+                    <div id="subContent-stickers" class="hidden space-y-4">
+                        <!-- Biblioteca de Emojis -->
+                        <div>
+                            <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">🤩 Emojis Rápidos</h4>
+                            <div class="grid grid-cols-6 gap-2 bg-zinc-950 p-3 rounded-xl border border-zinc-850">
+                                <button onclick="addNewSticker('emoji', '🔥')" class="text-2xl hover:scale-125 transition-all">🔥</button>
+                                <button onclick="addNewSticker('emoji', '✨')" class="text-2xl hover:scale-125 transition-all">✨</button>
+                                <button onclick="addNewSticker('emoji', '❤️')" class="text-2xl hover:scale-125 transition-all">❤️</button>
+                                <button onclick="addNewSticker('emoji', '😂')" class="text-2xl hover:scale-125 transition-all">😂</button>
+                                <button onclick="addNewSticker('emoji', '👑')" class="text-2xl hover:scale-125 transition-all">👑</button>
+                                <button onclick="addNewSticker('emoji', '🚀')" class="text-2xl hover:scale-125 transition-all">🚀</button>
+                                <button onclick="addNewSticker('emoji', '📸')" class="text-2xl hover:scale-125 transition-all">📸</button>
+                                <button onclick="addNewSticker('emoji', '🎵')" class="text-2xl hover:scale-125 transition-all">🎵</button>
+                                <button onclick="addNewSticker('emoji', '🎯')" class="text-2xl hover:scale-125 transition-all">🎯</button>
+                                <button onclick="addNewSticker('emoji', '💥')" class="text-2xl hover:scale-125 transition-all">💥</button>
+                                <button onclick="addNewSticker('emoji', '💡')" class="text-2xl hover:scale-125 transition-all">💡</button>
+                                <button onclick="addNewSticker('emoji', '📍')" class="text-2xl hover:scale-125 transition-all">📍</button>
+                            </div>
+                        </div>
+
+                        <!-- Biblioteca de Formas Vetoriais -->
+                        <div>
+                            <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">📐 Formas e Molduras</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="addNewSticker('shape', 'heart')" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 p-3 rounded-xl text-xs font-semibold text-zinc-300 flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500"></i> Coração
+                                </button>
+                                <button onclick="addNewSticker('shape', 'star')" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 p-3 rounded-xl text-xs font-semibold text-zinc-300 flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i> Estrela
+                                </button>
+                                <button onclick="addNewSticker('shape', 'circle-highlight')" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 p-3 rounded-xl text-xs font-semibold text-zinc-300 flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="circle-dot" class="w-4 h-4 text-blue-400"></i> Foco Circular
+                                </button>
+                                <button onclick="addNewSticker('shape', 'badge-retro')" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 p-3 rounded-xl text-xs font-semibold text-zinc-300 flex items-center justify-center gap-2 transition">
+                                    <i data-lucide="award" class="w-4 h-4 text-emerald-400"></i> Selo Retro
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Elementos Gráficos Ativos -->
+                        <div>
+                            <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Listagem de Stickers</h4>
+                            <div id="activeStickersList" class="space-y-2">
+                                <!-- Preenchido via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA EFEITOS & FILTROS -->
+                <div id="tabContent-effects" class="hidden space-y-4">
+                    <h3 class="text-sm font-bold text-zinc-300">Filtros de Cor</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setFilter('none')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            Normal
+                        </button>
+                        <button onclick="setFilter('vintage')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            📜 Vintage 70s
+                        </button>
+                        <button onclick="setFilter('cyberpunk')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            🧪 Neon Cyber
+                        </button>
+                        <button onclick="setFilter('blackwhite')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            🖤 P&B Dramático
+                        </button>
+                        <button onclick="setFilter('warmth')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            ☀️ Verão Quente
+                        </button>
+                        <button onclick="setFilter('cool')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            ❄️ Azul Frio
+                        </button>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-zinc-300 pt-2">Efeitos Dinâmicos (Filtros de Vídeo)</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setActiveAnimationEffect('none')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            Nenhum
+                        </button>
+                        <button onclick="setActiveAnimationEffect('vhs-glitch')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            📺 Ruído VHS
+                        </button>
+                        <button onclick="setActiveAnimationEffect('neon-glow')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            ⭐ Luz Estelar
+                        </button>
+                        <button onclick="setActiveAnimationEffect('falling-snow')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            ❄️ Neve Caindo
+                        </button>
+                        <button onclick="setActiveAnimationEffect('matrix')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            🟢 Chuva Matrix
+                        </button>
+                        <button onclick="setActiveAnimationEffect('fireflies')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            ✨ Pirilampos (Vagalumes)
+                        </button>
+                        <button onclick="setActiveAnimationEffect('rain-drops')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            🌧️ Chuva Realista
+                        </button>
+                        <button onclick="setActiveAnimationEffect('light-leaks')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            🌅 Vazamento de Luz (Leaks)
+                        </button>
+                        <button onclick="setActiveAnimationEffect('cyber-grid')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
+                            👾 Laser Cyber Grid
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ABA ÁUDIO -->
+                <div id="tabContent-audio" class="hidden space-y-4">
+                    <!-- Locutor / Gravador de Voz -->
+                    <div class="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 space-y-3">
+                        <h4 class="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Gravar Minha Voz (Voiceover)
+                        </h4>
+                        <p class="text-[10px] text-zinc-500 leading-normal">
+                            Grave áudio pelo microfone para criar locuções, adicionando-as como camadas sonoras individuais na sua timeline.
+                        </p>
+                        
+                        <div class="flex items-center gap-3">
+                            <button id="btnVoiceRecord" onclick="toggleVoiceRecording()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200">
+                                <i data-lucide="mic" class="w-4 h-4"></i> <span id="txtVoiceRecord">Começar Gravação</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-zinc-300 pt-2">Adicionar Faixa de Áudio (MP3 / Música)</h3>
+                    <label class="cursor-pointer border-2 border-dashed border-zinc-700 hover:border-purple-500 rounded-xl p-6 flex flex-col items-center justify-center gap-2 transition bg-zinc-950/50">
+                        <input type="file" accept="audio/mp3, audio/*" class="hidden" onchange="handleAudioUpload(this)">
+                        <i data-lucide="music-4" class="w-8 h-8 text-purple-400"></i>
+                        <span class="text-xs text-zinc-300 font-semibold text-center">Selecionar MP3 de Fundo</span>
+                        <p class="text-[10px] text-zinc-500 text-center">Você pode carregar várias faixas simultaneamente!</p>
+                    </label>
+
+                    <!-- Lista de Mixagem de Áudio Multicanal -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">🎚️ Console de Mixagem</h4>
+                        <div id="audioTracksList" class="space-y-2.5">
+                            <!-- Gerado via JS dinamicamente -->
+                            <p class="text-xs text-zinc-500 text-center py-2">Nenhum áudio carregado no projeto.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA PROJETOS -->
+                <div id="tabContent-projects" class="hidden space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-zinc-300">Meus Rascunhos</h3>
+                        <button onclick="saveCurrentToProjects()" class="text-xs bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1">
+                            <i data-lucide="save" class="w-3.5 h-3.5"></i> Salvar Rascunho
+                        </button>
+                    </div>
+
+                    <div id="savedProjectsList" class="space-y-2 max-h-[250px] overflow-y-auto">
+                        <!-- Carregados do IndexedDB -->
+                        <p class="text-xs text-zinc-500 text-center py-4">Nenhum rascunho salvo localmente.</p>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+    </main>
+
+    <!-- Modal do Simulador de Preview do Celular (Interativo) -->
+    <div id="phonePreviewModal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 z-50">
+        <!-- Controles Superiores do Modal -->
+        <div class="w-full max-w-sm flex items-center justify-between mb-4 z-10 px-2">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs text-zinc-300 font-bold tracking-wider">PREVIEW REAL</span>
+            </div>
+            <button onclick="closePhonePreview()" class="bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition">
+                <i data-lucide="x" class="w-4 h-4"></i> Fechar Preview
+            </button>
+        </div>
+
+        <!-- O Smartphone Simulado -->
+        <div class="phone-container">
+            <div class="phone-notch"></div>
+            
+            <!-- Tela Real do Story Espelhada do Canvas Principal -->
+            <canvas id="previewPhoneCanvas" class="w-full h-full object-cover"></canvas>
+
+            <!-- Interface Simulada do Stories por Cima (Instagram/WhatsApp Look) -->
+            <div class="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 pt-12 pb-6">
+                <!-- Barra Superior de Usuário -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[2px]">
+                            <div class="w-full h-full rounded-full bg-black border border-black flex items-center justify-center text-[10px] font-bold text-white">
+                                VOCÊ
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white shadow-sm">Seu Status / Story</p>
+                            <p class="text-[9px] text-zinc-300/90 shadow-sm">Agora mesmo • Criado no StoryCraft</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 text-white">
+                        <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                    </div>
+                </div>
+
+                <!-- Indicador de Histórias (Linhas do Topo) -->
+                <div class="absolute top-10 left-4 right-4 flex gap-1">
+                    <div class="h-1 flex-1 bg-white rounded-full"></div>
+                    <div class="h-1 flex-1 bg-white/40 rounded-full"></div>
+                </div>
+
+                <!-- Input Inferior Simulado de Enviar Mensagem/Resposta -->
+                <div class="flex items-center justify-between gap-3 pt-4">
+                    <div class="flex-1 bg-white/20 backdrop-blur-md border border-white/20 rounded-full px-4 py-2.5 flex items-center justify-between">
+                        <span class="text-[11px] text-white/90">Responder...</span>
+                        <i data-lucide="heart" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <p class="text-[11px] text-zinc-500 mt-4 text-center max-w-xs">
+            Esta é a proporção e enquadramento real de como o Story ficará na tela cheia de smartphones modernos.
+        </p>
+    </div>
+
+    <!-- Modal de Backup / Importação / Exportação Geral -->
+    <div id="backupModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 relative">
+            <button onclick="closeBackupModal()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-200">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-lg font-bold text-zinc-100 flex items-center gap-2 mb-4">
+                <i data-lucide="database" class="text-purple-400"></i> Backup Geral do Projeto
+            </h3>
+            
+            <div class="space-y-4">
+                <div class="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800">
+                    <p class="text-xs text-zinc-400 leading-relaxed mb-3">
+                        Gere um backup total em arquivo para poder transferir e continuar sua edição em outro celular ou computador facilmente.
+                    </p>
+                    <button onclick="downloadBackupFile()" class="w-full bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold py-2.5 rounded-lg flex items-center justify-center gap-2 transition">
+                        <i data-lucide="download-cloud" class="w-4 h-4"></i> Baixar Arquivo de Backup (.json)
+                    </button>
+                </div>
+
+                <div class="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800">
+                    <p class="text-xs text-zinc-400 leading-relaxed mb-3">
+                        Tem um arquivo de backup do StoryCraft? Carregue-o abaixo para restaurar sua área de trabalho.
+                    </p>
+                    <label class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-bold py-2.5 rounded-lg flex items-center justify-center gap-2 transition cursor-pointer">
+                        <input type="file" accept=".json" class="hidden" onchange="uploadBackupFile(this)">
+                        <i data-lucide="upload-cloud" class="w-4 h-4"></i> Carregar Backup / Restaurar
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Progresso da Exportação de Vídeo -->
+    <div id="exportModal" class="hidden fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-sm p-6 text-center space-y-4">
+            <div class="mx-auto w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                <i data-lucide="hourglass" class="w-6 h-6 text-purple-400 animate-spin"></i>
+            </div>
+            <div>
+                <h3 class="text-md font-bold text-zinc-100">Criando seu Story</h3>
+                <p class="text-xs text-zinc-400 mt-1">Por favor, mantenha o app aberto. Estamos processando todos os efeitos especiais.</p>
+            </div>
+            
+            <div class="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
+                <div id="exportProgressBar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-full w-[0%]" style="transition: width 0.1s linear;"></div>
+            </div>
+            <span id="exportProgressText" class="text-xs font-mono text-zinc-400 block">Processando: 0%</span>
+        </div>
+    </div>
+
+    <!-- Alertas Customizados Toast -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // --- CONSTANTES & ESTADOS DO APLICATIVO ---
+        const canvas = document.getElementById('storyCanvas');
+        const ctx = canvas.getContext('2d');
+        const defaultWidth = 1080;
+        const defaultHeight = 1920;
+        canvas.width = defaultWidth;
+        canvas.height = defaultHeight;
+
+        // Configurações do Canvas de Preview Simulado do Smartphone
+        const previewPhoneCanvas = document.getElementById('previewPhoneCanvas');
+        const previewCtx = previewPhoneCanvas.getContext('2d');
+        previewPhoneCanvas.width = defaultWidth;
+        previewPhoneCanvas.height = defaultHeight;
+
+        let activeTab = 'media';
+        let elementSubTab = 'texts';
+        let mediaFile = null; // { type: 'image'|'video', src: HTMLImageElement|HTMLVideoElement, scale: 1, yOffset: 0 }
+        
+        let textLayers = [];
+        let stickerLayers = []; // Stickers e Formas Decorativas adicionais
+        
+        let selectedTextId = null; // ID do texto em edição ativa para guias do canvas
+        let selectedStickerId = null; // ID do sticker ativo para arraste/guia
+
+        let selectedFilter = 'none';
+        let activeAnimationEffect = 'none';
+        
+        // MIXADOR DE ÁUDIO MULTICANAL
+        let audioTracks = []; // Array contendo: { id, name, src: HTMLAudioElement, originalData (Base64), volume (0 a 1) }
+        
+        let isPlaying = false;
+        let lastFrameTime = 0;
+        let animationDuration = 60; // NOVO PADRÃO: 60 segundos (1 minuto) de timeline
+        let currentTime = 0; // segundos decorridos para render e timeline
+        let isPhonePreviewActive = false;
+
+        // Locutor de Voz Integrado
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecordingVoice = false;
+
+        // Interação por Arraste e Redimensionamento Direto no Canvas
+        let isDragging = false;
+        let isResizing = false;
+        let dragTarget = null; // { type: 'text'|'sticker', id: ... }
+        let dragStartOffset = { x: 0, y: 0 };
+        let resizeStartSize = 0;
+        let resizeStartWidth = 0;
+        let resizeStartDistance = 0;
+        
+        // Configuração Ampliada de Fontes Google Fonts de Alto Impacto
+        const fontsAvailable = [
+            { name: 'Plus Jakarta Sans', fontClass: 'sans-serif' },
+            { name: 'Bangers', fontClass: 'bangers' },
+            { name: 'Cinzel', fontClass: 'serif' },
+            { name: 'Creepster', fontClass: 'creepster' },
+            { name: 'Press Start 2P', fontClass: 'monospace' },
+            { name: 'Shrikhand', fontClass: 'display-shrikhand' },
+            { name: 'Pacifico', fontClass: 'script-pacifico' },
+            { name: 'Anton', fontClass: 'impact-anton' },
+            { name: 'Special Elite', fontClass: 'vintage-elite' },
+            { name: 'Dancing Script', fontClass: 'elegant-dancing' },
+            { name: 'Rubik Mono One', fontClass: 'blocky-rubik' }
+        ];
+
+        // Partículas para Efeitos
+        let particles = [];
+
+        // --- SISTEMA DE BANCO DE DADOS (INDEXEDDB) ---
+        const DB_NAME = 'StoryCraftLocalDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'projects';
+        let db;
+
+        // Inicializa com segurança os ícones Lucide no documento
+        function initLucide() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                console.warn("Aguardando carregamento da biblioteca Lucide...");
+            }
+        }
+
+        function initDatabase() {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = (e) => console.error("Database error: ", e);
+            request.onsuccess = (e) => {
+                db = e.target.result;
+                loadProjectList();
+            };
+            request.onupgradeneeded = (e) => {
+                const activeDb = e.target.result;
+                if (!activeDb.objectStoreNames.contains(STORE_NAME)) {
+                    activeDb.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
+        }
+
+        // --- INICIALIZADOR PRINCIPAL ---
+        window.onload = function() {
+            initDatabase();
+            initLucide();
+            resetWorkspace();
+            initCanvasEvents();
+            registerStoryPWA();
+            requestAnimationFrame(renderLoop);
+        };
+
+        function resetWorkspace() {
+            mediaFile = {
+                type: 'color',
+                color: '#18181b',
+                scale: 1,
+                yOffset: 0
+            };
+            textLayers = [
+                {
+                    id: 'default-title',
+                    text: 'ARRASTE ESTA CAIXA',
+                    x: defaultWidth / 2,
+                    y: defaultHeight / 3,
+                    fontSize: 60,
+                    width: 800,
+                    align: 'center',
+                    color: '#ffffff',
+                    fontFamily: 'Bangers',
+                    shadow: true,
+                    shadowColor: '#a855f7',
+                    animation: 'float',
+                    bold: false
+                },
+                {
+                    id: 'default-subtitle',
+                    text: 'Ajuste a duração até 60s, a quebra de linha ou adicione stickers!',
+                    x: defaultWidth / 2,
+                    y: defaultHeight / 2 + 50,
+                    fontSize: 40,
+                    width: 750,
+                    align: 'center',
+                    color: '#f4f4f5',
+                    fontFamily: 'Plus Jakarta Sans',
+                    shadow: false,
+                    shadowColor: '#000000',
+                    animation: 'pulse',
+                    bold: true
+                }
+            ];
+            stickerLayers = [
+                {
+                    id: 'sticker-star-example',
+                    type: 'shape',
+                    value: 'star',
+                    x: defaultWidth / 2,
+                    y: defaultHeight / 1.5,
+                    size: 150,
+                    color: '#eab308'
+                }
+            ];
+            
+            // Pausar e limpar trilhas anteriores se houverem
+            audioTracks.forEach(t => { if (t.src) t.src.pause(); });
+            audioTracks = [];
+            
+            selectedTextId = 'default-title';
+            selectedStickerId = null;
+            selectedFilter = 'none';
+            activeAnimationEffect = 'none';
+            isPlaying = false;
+            currentTime = 0;
+            animationDuration = 60; // Reinicia para 60 segundos padrão
+
+            const durationSlider = document.getElementById('storyDurationSlider');
+            if (durationSlider) {
+                durationSlider.value = 60;
+                document.getElementById('storyDurationVal').innerText = '60s';
+            }
+
+            updateAudioPlaybackUI();
+            updateTextListUI();
+            updateStickerListUI();
+            updateAudioTracksUI();
+        }
+
+        // --- ATUALIZAÇÃO DURAÇÃO DO STORY ---
+        function updateStoryDuration(val) {
+            animationDuration = parseInt(val);
+            document.getElementById('storyDurationVal').innerText = val + 's';
+            if (currentTime > animationDuration) {
+                currentTime = 0;
+            }
+        }
+
+        // --- INTERAÇÕES DIRETAS (ARRASTAR & REDIMENSIONAR NO CANVAS) ---
+        function initCanvasEvents() {
+            const getCanvasCoords = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: (clientX - rect.left) * (defaultWidth / rect.width),
+                    y: (clientY - rect.top) * (defaultHeight / rect.height)
+                };
+            };
+
+            const handleStart = (e) => {
+                const coords = getCanvasCoords(e);
+                const clickX = coords.x;
+                const clickY = coords.y;
+
+                // 1. Verificar primeiro se clicou no botão de redimensionamento do elemento ativo
+                if (dragTarget) {
+                    let handleX, handleY;
+                    if (dragTarget.type === 'text') {
+                        const layer = textLayers.find(t => t.id === dragTarget.id);
+                        if (layer) {
+                            const fontStr = `${layer.bold ? 'bold ' : ''}${layer.fontSize}px "${layer.fontFamily}", sans-serif`;
+                            const lines = getWrappedLines(ctx, layer.text, layer.width || 800, fontStr);
+                            const totalHeight = lines.length * (layer.fontSize * 1.25);
+                            handleX = layer.x + (layer.width || 800) / 2;
+                            handleY = layer.y + totalHeight / 2;
+                        }
+                    } else if (dragTarget.type === 'sticker') {
+                        const sticker = stickerLayers.find(s => s.id === dragTarget.id);
+                        if (sticker) {
+                            handleX = sticker.x + sticker.size / 2;
+                            handleY = sticker.y + sticker.size / 2;
+                        }
+                    }
+
+                    if (handleX && handleY) {
+                        const dist = Math.hypot(clickX - handleX, clickY - handleY);
+                        if (dist < 55) { // Sensibilidade do botão de redimensionar
+                            isResizing = true;
+                            resizeStartDistance = Math.hypot(clickX - (dragTarget.type === 'text' ? textLayers.find(t=>t.id===dragTarget.id).x : stickerLayers.find(s=>s.id===dragTarget.id).x), clickY - (dragTarget.type === 'text' ? textLayers.find(t=>t.id===dragTarget.id).y : stickerLayers.find(s=>s.id===dragTarget.id).y));
+                            if (dragTarget.type === 'text') {
+                                resizeStartWidth = textLayers.find(t=>t.id===dragTarget.id).width || 800;
+                                resizeStartSize = textLayers.find(t=>t.id===dragTarget.id).fontSize;
+                            } else {
+                                resizeStartSize = stickerLayers.find(s=>s.id===dragTarget.id).size;
+                            }
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                }
+
+                // 2. Procurar clique dentro das caixas dos textos
+                for (let i = textLayers.length - 1; i >= 0; i--) {
+                    const layer = textLayers[i];
+                    const fontStr = `${layer.bold ? 'bold ' : ''}${layer.fontSize}px "${layer.fontFamily}", sans-serif`;
+                    const lines = getWrappedLines(ctx, layer.text, layer.width || 800, fontStr);
+                    const totalHeight = lines.length * (layer.fontSize * 1.25);
+                    const halfW = (layer.width || 800) / 2;
+                    const halfH = totalHeight / 2;
+
+                    if (clickX >= layer.x - halfW && clickX <= layer.x + halfW &&
+                        clickY >= layer.y - halfH && clickY <= layer.y + halfH) {
+                        
+                        dragTarget = { type: 'text', id: layer.id };
+                        selectedTextId = layer.id;
+                        selectedStickerId = null;
+                        isDragging = true;
+                        dragStartOffset = { x: clickX - layer.x, y: clickY - layer.y };
+                        updateTextListUI();
+                        updateTextListHighlight();
+                        e.preventDefault();
+                        return;
+                    }
+                }
+
+                // 3. Procurar clique dentro dos stickers/formas
+                for (let i = stickerLayers.length - 1; i >= 0; i--) {
+                    const sticker = stickerLayers[i];
+                    const halfSize = sticker.size / 2;
+
+                    if (clickX >= sticker.x - halfSize && clickX <= sticker.x + halfSize &&
+                        clickY >= sticker.y - halfSize && clickY <= sticker.y + halfSize) {
+                        
+                        dragTarget = { type: 'sticker', id: sticker.id };
+                        selectedStickerId = sticker.id;
+                        selectedTextId = null;
+                        isDragging = true;
+                        dragStartOffset = { x: clickX - sticker.x, y: clickY - sticker.y };
+                        updateStickerListUI();
+                        e.preventDefault();
+                        return;
+                    }
+                }
+
+                // Clicou fora: limpa seleções ativas
+                dragTarget = null;
+                selectedTextId = null;
+                selectedStickerId = null;
+                updateTextListHighlight();
+            };
+
+            const handleMove = (e) => {
+                if (!dragTarget) return;
+                const coords = getCanvasCoords(e);
+                const currentX = coords.x;
+                const currentY = coords.y;
+
+                if (isDragging) {
+                    if (dragTarget.type === 'text') {
+                        const layer = textLayers.find(t => t.id === dragTarget.id);
+                        if (layer) {
+                            layer.x = currentX - dragStartOffset.x;
+                            layer.y = currentY - dragStartOffset.y;
+                            updateTextListUI();
+                        }
+                    } else if (dragTarget.type === 'sticker') {
+                        const sticker = stickerLayers.find(s => s.id === dragTarget.id);
+                        if (sticker) {
+                            sticker.x = currentX - dragStartOffset.x;
+                            sticker.y = currentY - dragStartOffset.y;
+                            updateStickerListUI();
+                        }
+                    }
+                } else if (isResizing) {
+                    if (dragTarget.type === 'text') {
+                        const layer = textLayers.find(t => t.id === dragTarget.id);
+                        if (layer) {
+                            const currentDist = Math.hypot(currentX - layer.x, currentY - layer.y);
+                            const ratio = currentDist / resizeStartDistance;
+                            
+                            // Redimensiona proporcionalmente a largura e a fonte
+                            layer.width = Math.max(150, Math.min(1000, Math.round(resizeStartWidth * ratio)));
+                            layer.fontSize = Math.max(15, Math.min(120, Math.round(resizeStartSize * ratio)));
+                            updateTextListUI();
+                        }
+                    } else if (dragTarget.type === 'sticker') {
+                        const sticker = stickerLayers.find(s => s.id === dragTarget.id);
+                        if (sticker) {
+                            const currentDist = Math.hypot(currentX - sticker.x, currentY - sticker.y);
+                            const ratio = currentDist / resizeStartDistance;
+                            sticker.size = Math.max(40, Math.min(600, Math.round(resizeStartSize * ratio)));
+                            updateStickerListUI();
+                        }
+                    }
+                }
+            };
+
+            const handleEnd = () => {
+                isDragging = false;
+                isResizing = false;
+            };
+
+            canvas.addEventListener('mousedown', handleStart);
+            canvas.addEventListener('mousemove', handleMove);
+            window.addEventListener('mouseup', handleEnd);
+
+            canvas.addEventListener('touchstart', handleStart, { passive: false });
+            canvas.addEventListener('touchmove', handleMove, { passive: false });
+            window.addEventListener('touchend', handleEnd);
+        }
+
+        // --- SISTEMA DE PRESETS E TEMPLATES 1-CLIQUE ---
+        function applyPresetTemplate(templateId) {
+            resetWorkspace();
+            
+            if (templateId === 'retro-vhs') {
+                mediaFile = { type: 'color', color: '#09090b', scale: 1, yOffset: 0 };
+                textLayers = [
+                    {
+                        id: 'vhs-t1',
+                        text: 'MOMENTO RARO',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 2 - 100,
+                        fontSize: 80,
+                        width: 900,
+                        align: 'center',
+                        color: '#00ffff',
+                        fontFamily: 'Rubik Mono One',
+                        shadow: true,
+                        shadowColor: '#ff0055',
+                        animation: 'shake',
+                        bold: true
+                    },
+                    {
+                        id: 'vhs-t2',
+                        text: 'Estilo gravador analógico anos 90',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 2 + 100,
+                        fontSize: 35,
+                        width: 800,
+                        align: 'center',
+                        color: '#ffffff',
+                        fontFamily: 'Special Elite',
+                        shadow: false,
+                        shadowColor: '#000000',
+                        animation: 'none',
+                        bold: false
+                    }
+                ];
+                stickerLayers = [];
+                selectedFilter = 'vintage';
+                activeAnimationEffect = 'vhs-glitch';
+                showToast("Template Retro VHS Aplicado!");
+
+            } else if (templateId === 'cyber-neon') {
+                mediaFile = { type: 'gradient', scale: 1, yOffset: 0 };
+                textLayers = [
+                    {
+                        id: 'cyber-t1',
+                        text: 'NEON FUTURE',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 2.5,
+                        fontSize: 90,
+                        width: 900,
+                        align: 'center',
+                        color: '#ffffff',
+                        fontFamily: 'Shrikhand',
+                        shadow: true,
+                        shadowColor: '#ec4899',
+                        animation: 'float',
+                        bold: true
+                    }
+                ];
+                stickerLayers = [
+                    {
+                        id: 'cyber-shape1',
+                        type: 'shape',
+                        value: 'star',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 1.5,
+                        size: 180,
+                        color: '#a855f7'
+                    }
+                ];
+                selectedFilter = 'cyberpunk';
+                activeAnimationEffect = 'cyber-grid';
+                showToast("Template Cyber Neon Aplicado!");
+
+            } else if (templateId === 'boho-summer') {
+                mediaFile = { type: 'color', color: '#dfd5c6', scale: 1, yOffset: 0 }; // Bege Boho
+                textLayers = [
+                    {
+                        id: 'boho-t1',
+                        text: 'Calmaria e sol.',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 2.5,
+                        fontSize: 65,
+                        width: 800,
+                        align: 'center',
+                        color: '#5c4d3c',
+                        fontFamily: 'Dancing Script',
+                        shadow: false,
+                        shadowColor: '#000000',
+                        animation: 'float',
+                        bold: true
+                    },
+                    {
+                        id: 'boho-t2',
+                        text: 'UM DIA DE CADA VEZ',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 1.8,
+                        fontSize: 35,
+                        width: 750,
+                        align: 'center',
+                        color: '#7a6a58',
+                        fontFamily: 'Cinzel',
+                        shadow: false,
+                        shadowColor: '#000000',
+                        animation: 'none',
+                        bold: true
+                    }
+                ];
+                stickerLayers = [
+                    {
+                        id: 'boho-shape1',
+                        type: 'shape',
+                        value: 'heart',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 1.4,
+                        size: 120,
+                        color: '#b58a7b'
+                    }
+                ];
+                selectedFilter = 'warmth';
+                activeAnimationEffect = 'light-leaks';
+                showToast("Template Boho Summer Aplicado!");
+
+            } else if (templateId === 'winter-snow') {
+                mediaFile = { type: 'gradient', scale: 1, yOffset: 0 };
+                textLayers = [
+                    {
+                        id: 'winter-t1',
+                        text: 'Magia de Inverno',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 2,
+                        fontSize: 75,
+                        width: 850,
+                        align: 'center',
+                        color: '#ffffff',
+                        fontFamily: 'Pacifico',
+                        shadow: true,
+                        shadowColor: '#3b82f6',
+                        animation: 'pulse',
+                        bold: false
+                    }
+                ];
+                stickerLayers = [];
+                selectedFilter = 'cool';
+                activeAnimationEffect = 'falling-snow';
+                showToast("Template Winter Magic Aplicado!");
+            }
+
+            // Atualiza UI geral pós-reset e preset
+            selectedTextId = textLayers.length > 0 ? textLayers[0].id : null;
+            updateTextListUI();
+            updateStickerListUI();
+        }
+
+        // --- SISTEMA DE LOCUÇÃO DE VOZ (MICROFONE) ---
+        function toggleVoiceRecording() {
+            if (isRecordingVoice) {
+                stopVoiceRecording();
+            } else {
+                startVoiceRecording();
+            }
+        }
+
+        async function startVoiceRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast("Seu navegador não oferece suporte para gravação de voz.", true);
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const audio = new Audio(e.target.result);
+                        audio.loop = true;
+                        
+                        const newTrack = {
+                            id: 'audio-voice-' + Date.now(),
+                            name: "Locução Gravada " + new Date().toLocaleTimeString(),
+                            src: audio,
+                            originalData: e.target.result,
+                            volume: 1.0 // Volume padrão total para voz
+                        };
+                        
+                        audioTracks.push(newTrack);
+                        updateAudioTracksUI();
+                        
+                        if (isPlaying) {
+                            audio.volume = newTrack.volume;
+                            audio.play().catch(()=>{});
+                        }
+                        showToast("Locução de voz adicionada!");
+                    };
+                    reader.readAsDataURL(audioBlob);
+
+                    // Fechar trilhas do microfone
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                isRecordingVoice = true;
+                
+                // Atualizar UI do Botão de Gravação
+                const btn = document.getElementById('btnVoiceRecord');
+                btn.className = "flex-1 bg-red-500 hover:bg-red-600 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200 animate-pulse";
+                document.getElementById('txtVoiceRecord').innerText = "Gravando voz... Toque para Parar";
+                showToast("Gravando voz... fale próximo ao microfone.");
+            } catch (err) {
+                console.error(err);
+                showToast("Permissão de microfone negada ou indisponível.", true);
+            }
+        }
+
+        function stopVoiceRecording() {
+            if (mediaRecorder && isRecordingVoice) {
+                mediaRecorder.stop();
+                isRecordingVoice = false;
+
+                // Restaurar UI do botão
+                const btn = document.getElementById('btnVoiceRecord');
+                btn.className = "flex-1 bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200";
+                document.getElementById('txtVoiceRecord').innerText = "Começar Gravação";
+            }
+        }
+
+        // --- SISTEMA DE SUB-ABAS ELEMENTOS ---
+        function switchElementSubTab(subTabId) {
+            document.getElementById(`subContent-${elementSubTab}`).classList.add('hidden');
+            document.getElementById(`btnSub-${elementSubTab}`).className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-zinc-800 text-zinc-400 hover:text-zinc-200";
+            
+            document.getElementById(`subContent-${subTabId}`).classList.remove('hidden');
+            document.getElementById(`btnSub-${subTabId}`).className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-purple-600 text-white";
+            
+            elementSubTab = subTabId;
+        }
+
+        // --- GERENCIAMENTO DE STICKERS ---
+        function addNewSticker(type, value) {
+            const newSticker = {
+                id: 'sticker-' + Date.now(),
+                type: type, // 'emoji' ou 'shape'
+                value: value, // ex: '🔥' ou 'star'
+                x: defaultWidth / 2,
+                y: defaultHeight / 2,
+                size: 150,
+                color: '#ffffff' // Cor da forma caso seja shape
+            };
+            stickerLayers.push(newSticker);
+            selectedStickerId = newSticker.id;
+            selectedTextId = null;
+            updateStickerListUI();
+            showToast("Sticker adicionado!");
+        }
+
+        function updateStickerListUI() {
+            const container = document.getElementById('activeStickersList');
+            container.innerHTML = '';
+
+            if (stickerLayers.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-2">Nenhum sticker ou forma ativa.</p>`;
+                return;
+            }
+
+            stickerLayers.forEach((sticker, index) => {
+                const isSelected = selectedStickerId === sticker.id;
+                const card = document.createElement('div');
+                card.className = `bg-zinc-950 p-2.5 rounded-xl border transition ${isSelected ? 'border-purple-500' : 'border-zinc-850'}`;
+                card.onclick = () => {
+                    selectedStickerId = sticker.id;
+                    selectedTextId = null;
+                    updateStickerListUI();
+                };
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-bold text-zinc-400">STICKER #${index + 1} (${sticker.value})</span>
+                        <button onclick="removeSticker('${sticker.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <div>
+                            <span class="text-[9px] text-zinc-500 block">Tamanho (${sticker.size}px)</span>
+                            <input type="range" min="40" max="600" value="${sticker.size}" oninput="updateStickerProperty('${sticker.id}', 'size', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                        </div>
+                        ${sticker.type === 'shape' ? `
+                        <div>
+                            <span class="text-[9px] text-zinc-500 block">Cor da Forma</span>
+                            <input type="color" value="${sticker.color}" oninput="updateStickerProperty('${sticker.id}', 'color', this.value)" class="w-full h-6 bg-transparent border border-zinc-800 rounded cursor-pointer">
+                        </div>
+                        ` : `
+                        <div class="text-[9px] text-zinc-500 flex items-center justify-center">
+                            Apenas Emojis
+                        </div>
+                        `}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            initLucide();
+        }
+
+        function updateStickerProperty(id, property, value) {
+            const index = stickerLayers.findIndex(s => s.id === id);
+            if (index !== -1) {
+                stickerLayers[index][property] = value;
+            }
+        }
+
+        function removeSticker(id) {
+            stickerLayers = stickerLayers.filter(s => s.id !== id);
+            if (selectedStickerId === id) {
+                selectedStickerId = stickerLayers.length > 0 ? stickerLayers[0].id : null;
+            }
+            updateStickerListUI();
+            showToast("Sticker removido.");
+        }
+
+        // --- PREVIEW DE SMARTPHONE ---
+        function openPhonePreview() {
+            isPhonePreviewActive = true;
+            document.getElementById('phonePreviewModal').classList.remove('hidden');
+            showToast("Modo de visualização móvel ativo!");
+        }
+
+        function closePhonePreview() {
+            isPhonePreviewActive = false;
+            document.getElementById('phonePreviewModal').classList.add('hidden');
+        }
+
+        // --- NAVEGAÇÃO DE ABAS ---
+        function switchTab(tabId) {
+            document.getElementById(`tabContent-${activeTab}`).classList.add('hidden');
+            document.getElementById(`tabBtn-${activeTab}`).className = "flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent text-zinc-400";
+            
+            document.getElementById(`tabContent-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tabBtn-${tabId}`).className = "flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-purple-500 text-purple-400";
+            
+            activeTab = tabId;
+        }
+
+        // --- GERENCIAMENTO DE MÍDIA (UPLOAD) ---
+        function handleMediaUpload(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (type === 'image') {
+                    const img = new Image();
+                    img.onload = function() {
+                        mediaFile = {
+                            type: 'image',
+                            src: img,
+                            originalData: e.target.result,
+                            scale: 1,
+                            yOffset: 0
+                        };
+                        showToast("Foto carregada com sucesso!");
+                    };
+                    img.src = e.target.result;
+                } else if (type === 'video') {
+                    const video = document.createElement('video');
+                    video.src = e.target.result;
+                    video.muted = true;
+                    video.loop = true;
+                    video.playsInline = true;
+                    video.onloadeddata = function() {
+                        mediaFile = {
+                            type: 'video',
+                            src: video,
+                            originalData: e.target.result,
+                            scale: 1,
+                            yOffset: 0
+                        };
+                        video.play();
+                        isPlaying = true;
+                        updateAudioPlaybackUI();
+                        showToast("Vídeo de fundo carregado!");
+                    };
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function setSolidBackground(mode) {
+            if (mode === 'gradient') {
+                mediaFile = { type: 'gradient', scale: 1, yOffset: 0 };
+            } else {
+                mediaFile = { type: 'color', color: mode, scale: 1, yOffset: 0 };
+            }
+            showToast("Plano de fundo atualizado!");
+        }
+
+        function updateMediaScale(value) {
+            if (mediaFile) mediaFile.scale = parseFloat(value);
+        }
+
+        // --- SISTEMA DE TEXTOS ---
+        function addNewText() {
+            const newText = {
+                id: 'text-' + Date.now(),
+                text: 'Insira seu texto comprido aqui para testar a quebra automática.',
+                x: defaultWidth / 2,
+                y: defaultHeight / 2,
+                fontSize: 45,
+                width: 700,
+                align: 'center',
+                color: '#ffffff',
+                fontFamily: 'Plus Jakarta Sans',
+                shadow: true,
+                shadowColor: '#000000',
+                animation: 'none',
+                bold: false
+            };
+            textLayers.push(newText);
+            selectedTextId = newText.id;
+            selectedStickerId = null;
+            updateTextListUI();
+            showToast("Texto adicionado!");
+        }
+
+        function updateTextListUI() {
+            const container = document.getElementById('activeTextsList');
+            container.innerHTML = '';
+
+            if (textLayers.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-4">Nenhum texto no Story.</p>`;
+                return;
+            }
+
+            textLayers.forEach((layer, index) => {
+                const isSelected = selectedTextId === layer.id;
+                const card = document.createElement('div');
+                card.className = `bg-zinc-950 p-3 rounded-xl border transition-all space-y-3 relative ${isSelected ? 'border-purple-500 ring-1 ring-purple-500' : 'border-zinc-850'}`;
+                card.onclick = () => {
+                    selectedTextId = layer.id;
+                    selectedStickerId = null;
+                    updateTextListHighlight();
+                };
+                card.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-bold ${isSelected ? 'text-purple-400' : 'text-zinc-500'}">TEXTO #${index + 1} ${isSelected ? '(ATIVO)' : ''}</span>
+                        <button onclick="removeText('${layer.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <span class="text-[10px] text-zinc-500 block mb-1">Conteúdo do Texto (Suporta Enter)</span>
+                        <textarea oninput="updateTextProperty('${layer.id}', 'text', this.value)" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-purple-500 resize-none font-medium">${layer.text}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-[10px] text-zinc-500 block mb-1">Fonte</span>
+                            <select onchange="updateTextProperty('${layer.id}', 'fontFamily', this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-1.5 py-1 text-xs text-zinc-300">
+                                ${fontsAvailable.map(f => `<option value="${f.name}" ${layer.fontFamily === f.name ? 'selected' : ''}>${f.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-zinc-500 block mb-1">Cor</span>
+                            <div class="flex items-center gap-1">
+                                <input type="color" value="${layer.color}" oninput="updateTextProperty('${layer.id}', 'color', this.value)" class="w-8 h-6 bg-transparent border border-zinc-800 rounded cursor-pointer">
+                                <span class="text-[10px] font-mono">${layer.color}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <span class="text-[10px] text-zinc-500 block mb-1">Estilo & Alinhamento</span>
+                            <div class="flex gap-1 bg-zinc-900 p-0.5 rounded-lg border border-zinc-800">
+                                <button onclick="updateTextProperty('${layer.id}', 'bold', ${!layer.bold}); updateTextListUI(); event.stopPropagation();" class="flex-1 py-1 flex justify-center items-center rounded ${layer.bold ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}" title="Negrito">
+                                    <i data-lucide="bold" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button onclick="updateTextProperty('${layer.id}', 'align', 'left'); event.stopPropagation();" class="flex-1 py-1 flex justify-center rounded ${layer.align === 'left' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}" title="Esquerda">
+                                    <i data-lucide="align-left" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button onclick="updateTextProperty('${layer.id}', 'align', 'center'); event.stopPropagation();" class="flex-1 py-1 flex justify-center rounded ${layer.align === 'center' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}" title="Centralizado">
+                                    <i data-lucide="align-center" class="w-3.5 h-3.5"></i>
+                                </button>
+                                <button onclick="updateTextProperty('${layer.id}', 'align', 'right'); event.stopPropagation();" class="flex-1 py-1 flex justify-center rounded ${layer.align === 'right' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}" title="Direita">
+                                    <i data-lucide="align-right" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-zinc-500 block mb-1">Efeito Visual / Animação</span>
+                            <select onchange="updateTextProperty('${layer.id}', 'animation', this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-1.5 py-1 text-xs text-zinc-300">
+                                <option value="none" ${layer.animation === 'none' ? 'selected' : ''}>Estático</option>
+                                <option value="float" ${layer.animation === 'float' ? 'selected' : ''}>Flutuar</option>
+                                <option value="pulse" ${layer.animation === 'pulse' ? 'selected' : ''}>Pulsar</option>
+                                <option value="shake" ${layer.animation === 'shake' ? 'selected' : ''}>📳 Tremor (Shake)</option>
+                                <option value="rainbow" ${layer.animation === 'rainbow' ? 'selected' : ''}>🌈 Arco-íris (Rainbow)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-1">
+                        <div>
+                            <div class="flex justify-between text-[10px] text-zinc-500 mb-1">
+                                <span>Largura da Caixa</span>
+                                <span class="font-mono text-zinc-300">${layer.width}px</span>
+                            </div>
+                            <input type="range" min="150" max="1000" step="10" value="${layer.width}" oninput="updateTextProperty('${layer.id}', 'width', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <div class="flex justify-between text-[10px] text-zinc-500 mb-1">
+                                    <span>Tamanho Letra</span>
+                                    <span class="font-mono text-zinc-300">${layer.fontSize}px</span>
+                                </div>
+                                <input type="range" min="15" max="120" value="${layer.fontSize}" oninput="updateTextProperty('${layer.id}', 'fontSize', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-[10px] text-zinc-500 mb-1">
+                                    <span>Posição Vertical</span>
+                                    <span class="font-mono text-zinc-300">${layer.y}px</span>
+                                </div>
+                                <input type="range" min="100" max="1800" value="${layer.y}" oninput="updateTextProperty('${layer.id}', 'y', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="checkbox" id="shadow-${layer.id}" ${layer.shadow ? 'checked' : ''} onchange="updateTextProperty('${layer.id}', 'shadow', this.checked)" class="accent-purple-500 rounded">
+                        <label for="shadow-${layer.id}" class="text-xs text-zinc-400">Sombra Neon</label>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            initLucide();
+        }
+
+        function updateTextListHighlight() {
+            const container = document.getElementById('activeTextsList');
+            const cards = container.children;
+            textLayers.forEach((layer, index) => {
+                const isSelected = selectedTextId === layer.id;
+                const card = cards[index];
+                if (card) {
+                    card.className = `bg-zinc-950 p-3 rounded-xl border transition-all space-y-3 relative ${isSelected ? 'border-purple-500 ring-1 ring-purple-500' : 'border-zinc-850'}`;
+                }
+            });
+        }
+
+        function updateTextProperty(id, property, value) {
+            const index = textLayers.findIndex(t => t.id === id);
+            if (index !== -1) {
+                textLayers[index][property] = value;
+                if (property === 'align') {
+                    updateTextListUI();
+                }
+            }
+        }
+
+        function removeText(id) {
+            textLayers = textLayers.filter(t => t.id !== id);
+            if (selectedTextId === id) {
+                selectedTextId = textLayers.length > 0 ? textLayers[0].id : null;
+            }
+            updateTextListUI();
+            showToast("Texto removido.");
+        }
+
+        // --- ALGORITMO DE QUEBRA DE LINHAS (WORD WRAP) ---
+        function getWrappedLines(targetCtx, text, maxWidth, fontStr) {
+            targetCtx.save();
+            targetCtx.font = fontStr;
+            const paragraphs = text.split('\n');
+            const allLines = [];
+
+            paragraphs.forEach(para => {
+                const words = para.split(' ');
+                let currentLine = '';
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = currentLine + words[n] + ' ';
+                    const metrics = targetCtx.measureText(testLine);
+                    if (metrics.width > maxWidth && n > 0) {
+                        allLines.push(currentLine.trim());
+                        currentLine = words[n] + ' ';
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                allLines.push(currentLine.trim());
+            });
+
+            targetCtx.restore();
+            return allLines;
+        }
+
+        // --- SISTEMA DE MIXAGEM DE ÁUDIO MULTICANAL ---
+        function handleAudioUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const audio = new Audio(e.target.result);
+                audio.loop = true;
+                
+                const newTrack = {
+                    id: 'audio-' + Date.now(),
+                    name: file.name,
+                    src: audio,
+                    originalData: e.target.result,
+                    volume: 0.8 // Volume padrão inicial em 80%
+                };
+
+                audioTracks.push(newTrack);
+                updateAudioTracksUI();
+
+                if (isPlaying) {
+                    audio.volume = newTrack.volume;
+                    audio.play().catch(()=>{});
+                }
+
+                showToast("Áudio importado e adicionado à mesa de som!");
+            };
+            reader.readAsDataURL(file);
+            input.value = ""; // Reseta o input para carregar o mesmo arquivo de novo
+        }
+
+        function updateAudioTracksUI() {
+            const container = document.getElementById('audioTracksList');
+            container.innerHTML = '';
+
+            if (audioTracks.length === 0) {
+                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-4">Nenhuma faixa sonora ativa.</p>`;
+                document.getElementById('audioStatusText').innerText = "Sem trilha sonora";
+                return;
+            }
+
+            document.getElementById('audioStatusText').innerText = `${audioTracks.length} trilha(s) ativa(s)`;
+
+            audioTracks.forEach(track => {
+                const card = document.createElement('div');
+                card.className = "bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-zinc-300 font-semibold truncate max-w-[190px]">${track.name}</span>
+                        <button onclick="removeAudioTrack('${track.id}')" class="text-red-400 hover:text-red-300 text-[10px] flex items-center gap-0.5">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Excluir
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="volume-2" class="w-4 h-4 text-zinc-500"></i>
+                        <input type="range" min="0" max="1" step="0.05" value="${track.volume}" 
+                               oninput="updateTrackVolume('${track.id}', this.value)" 
+                               class="flex-1 accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                        <span class="text-[10px] font-mono text-zinc-400 min-w-[30px] text-right">${Math.round(track.volume * 100)}%</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            initLucide();
+        }
+
+        function updateTrackVolume(id, vol) {
+            const track = audioTracks.find(t => t.id === id);
+            if (track) {
+                track.volume = parseFloat(vol);
+                if (track.src) {
+                    track.src.volume = track.volume;
+                }
+                updateAudioTracksUI();
+            }
+        }
+
+        function removeAudioTrack(id) {
+            const track = audioTracks.find(t => t.id === id);
+            if (track && track.src) {
+                track.src.pause();
+            }
+            audioTracks = audioTracks.filter(t => t.id !== id);
+            updateAudioTracksUI();
+            showToast("Faixa de áudio removida.");
+        }
+
+        function togglePlayback() {
+            isPlaying = !isPlaying;
+            const playIcon = document.getElementById('playIcon');
+            
+            if (isPlaying) {
+                playIcon.setAttribute('data-lucide', 'pause');
+                if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
+                    mediaFile.src.play().catch(()=>{});
+                }
+                // Reproduzir sincronizadamente todas as faixas da mixadora
+                audioTracks.forEach(track => {
+                    if (track.src) {
+                        track.src.volume = track.volume;
+                        track.src.play().catch(()=>{});
+                    }
+                });
+            } else {
+                playIcon.setAttribute('data-lucide', 'play');
+                if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
+                    mediaFile.src.pause();
+                }
+                // Pausar todos
+                audioTracks.forEach(track => {
+                    if (track.src) track.src.pause();
+                });
+            }
+            initLucide();
+        }
+
+        function updateAudioPlaybackUI() {
+            const playIcon = document.getElementById('playIcon');
+            if (isPlaying) {
+                playIcon.setAttribute('data-lucide', 'pause');
+            } else {
+                playIcon.setAttribute('data-lucide', 'play');
+            }
+            initLucide();
+        }
+
+        // --- LOOP DE RENDERIZAÇÃO PRINCIPAL DO CANVAS ---
+        function renderLoop(timestamp) {
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            const delta = (timestamp - lastFrameTime) / 1000;
+            lastFrameTime = timestamp;
+
+            if (isPlaying) {
+                currentTime += delta;
+                if (currentTime >= animationDuration) {
+                    currentTime = 0;
+                    // Sincronizar todos os áudios no reinício do loop configurado
+                    audioTracks.forEach(track => {
+                        if (track.src) track.src.currentTime = 0;
+                    });
+                    if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
+                        mediaFile.src.currentTime = 0;
+                    }
+                }
+            }
+
+            const formatTime = (sec) => {
+                const s = Math.floor(sec % 60).toString().padStart(2, '0');
+                const m = Math.floor(sec / 60).toString().padStart(2, '0');
+                return `${m}:${s}`;
+            };
+            document.getElementById('videoDurationText').innerText = `${formatTime(currentTime)} / ${formatTime(animationDuration)}`;
+
+            // Limpa canvas principal
+            ctx.clearRect(0, 0, defaultWidth, defaultHeight);
+
+            // 1. Desenhar Fundo
+            drawBackground(ctx);
+
+            // 2. Aplicar Filtros Gerais
+            applyColorFilters(ctx);
+
+            // 3. Desenhar Efeitos de Partícula (e novos filtros de vídeo)
+            drawOverlayEffects(ctx, delta);
+
+            // 4. Desenhar Stickers e Formas
+            drawStickers(ctx, true);
+
+            // 5. Desenhar Textos com quebra automática, bold e animações
+            drawTexts(ctx, true);
+
+            // Se o preview simulado estiver ativo, desenha idêntico nele
+            if (isPhonePreviewActive) {
+                previewCtx.clearRect(0, 0, defaultWidth, defaultHeight);
+                drawBackground(previewCtx);
+                applyColorFilters(previewCtx);
+                drawOverlayEffects(previewCtx, delta);
+                drawStickers(previewCtx, false);
+                drawTexts(previewCtx, false);
+            }
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        function drawBackground(targetCtx) {
+            if (!mediaFile) return;
+
+            if (mediaFile.type === 'color') {
+                targetCtx.fillStyle = mediaFile.color;
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+            } else if (mediaFile.type === 'gradient') {
+                const gradient = targetCtx.createLinearGradient(0, 0, defaultWidth, defaultHeight);
+                gradient.addColorStop(0, '#7c3aed');
+                gradient.addColorStop(0.5, '#db2777');
+                gradient.addColorStop(1, '#2563eb');
+                targetCtx.fillStyle = gradient;
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+            } else if (mediaFile.type === 'image' && mediaFile.src) {
+                targetCtx.save();
+                targetCtx.translate(defaultWidth / 2, defaultHeight / 2 + mediaFile.yOffset);
+                targetCtx.scale(mediaFile.scale, mediaFile.scale);
+                
+                const img = mediaFile.src;
+                const imgRatio = img.width / img.height;
+                const canvasRatio = defaultWidth / defaultHeight;
+                let drawW, drawH;
+
+                if (imgRatio > canvasRatio) {
+                    drawH = defaultHeight;
+                    drawW = defaultHeight * imgRatio;
+                } else {
+                    drawW = defaultWidth;
+                    drawH = defaultWidth / imgRatio;
+                }
+
+                targetCtx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+                targetCtx.restore();
+            } else if (mediaFile.type === 'video' && mediaFile.src) {
+                targetCtx.save();
+                targetCtx.translate(defaultWidth / 2, defaultHeight / 2 + mediaFile.yOffset);
+                targetCtx.scale(mediaFile.scale, mediaFile.scale);
+                
+                const video = mediaFile.src;
+                const videoRatio = video.videoWidth / video.videoHeight;
+                let drawW = defaultWidth;
+                let drawH = defaultHeight;
+
+                if (videoRatio) {
+                    const canvasRatio = defaultWidth / defaultHeight;
+                    if (videoRatio > canvasRatio) {
+                        drawH = defaultHeight;
+                        drawW = defaultHeight * videoRatio;
+                    } else {
+                        drawW = defaultWidth;
+                        drawH = defaultWidth / videoRatio;
+                    }
+                }
+
+                targetCtx.drawImage(video, -drawW / 2, -drawH / 2, drawW, drawH);
+                targetCtx.restore();
+            }
+        }
+
+        function applyColorFilters(targetCtx) {
+            if (selectedFilter === 'none') return;
+
+            targetCtx.save();
+            if (selectedFilter === 'vintage') {
+                targetCtx.fillStyle = 'rgba(217, 119, 6, 0.15)';
+                targetCtx.globalCompositeOperation = 'color-burn';
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+                targetCtx.fillStyle = 'rgba(107, 114, 128, 0.1)';
+                targetCtx.globalCompositeOperation = 'multiply';
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+            } else if (selectedFilter === 'cyberpunk') {
+                targetCtx.fillStyle = 'rgba(147, 51, 234, 0.2)';
+                targetCtx.globalCompositeOperation = 'color-dodge';
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+                targetCtx.fillStyle = 'rgba(236, 72, 153, 0.15)';
+                targetCtx.globalCompositeOperation = 'overlay';
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+            } else if (selectedFilter === 'blackwhite') {
+                targetCtx.fillStyle = '#000000';
+                targetCtx.globalCompositeOperation = 'saturation';
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+            } else if (selectedFilter === 'warmth') {
+                targetCtx.fillStyle = 'rgba(239, 68, 68, 0.12)';
+                targetCtx.globalCompositeOperation = 'color';
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+            } else if (selectedFilter === 'cool') {
+                targetCtx.fillStyle = 'rgba(59, 130, 246, 0.15)';
+                targetCtx.globalCompositeOperation = 'color';
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+            }
+            targetCtx.restore();
+        }
+
+        function drawOverlayEffects(targetCtx, delta) {
+            if (activeAnimationEffect === 'none') return;
+
+            if (activeAnimationEffect === 'falling-snow') {
+                if (particles.length < 100) {
+                    particles.push({
+                        x: Math.random() * defaultWidth,
+                        y: -20,
+                        size: Math.random() * 8 + 3,
+                        speed: Math.random() * 100 + 50,
+                        opacity: Math.random() * 0.8 + 0.2
+                    });
+                }
+                
+                targetCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                particles.forEach((p, index) => {
+                    p.y += p.speed * delta;
+                    if (p.y > defaultHeight) {
+                        particles[index] = {
+                            x: Math.random() * defaultWidth,
+                            y: -20,
+                            size: Math.random() * 8 + 3,
+                            speed: Math.random() * 100 + 50,
+                            opacity: Math.random() * 0.8 + 0.2
+                        };
+                    }
+                    targetCtx.save();
+                    targetCtx.globalAlpha = p.opacity;
+                    targetCtx.beginPath();
+                    targetCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    targetCtx.fill();
+                    targetCtx.restore();
+                });
+            }
+
+            else if (activeAnimationEffect === 'matrix') {
+                const cols = 25;
+                if (particles.length === 0) {
+                    for (let i = 0; i < cols; i++) {
+                        particles.push({
+                            x: (defaultWidth / cols) * i + 10,
+                            y: Math.random() * -1000,
+                            speed: Math.random() * 300 + 150,
+                            chars: ["0", "1", "X", "Y", "Z", "$", "#"]
+                        });
+                    }
+                }
+
+                targetCtx.fillStyle = '#22c55e';
+                targetCtx.font = '24px monospace';
+                particles.forEach(p => {
+                    p.y += p.speed * delta;
+                    if (p.y > defaultHeight) {
+                        p.y = Math.random() * -300;
+                    }
+                    const randomChar = p.chars[Math.floor(Math.random() * p.chars.length)];
+                    targetCtx.fillText(randomChar, p.x, p.y);
+                });
+            }
+
+            else if (activeAnimationEffect === 'neon-glow') {
+                if (particles.length < 15) {
+                    particles.push({
+                        x: Math.random() * defaultWidth,
+                        y: Math.random() * defaultHeight,
+                        radius: Math.random() * 40 + 10,
+                        pulse: Math.random() * 5 + 2,
+                        color: Math.random() > 0.5 ? 'rgba(168, 85, 247, 0.4)' : 'rgba(236, 72, 153, 0.4)'
+                    });
+                }
+
+                particles.forEach(p => {
+                    const alpha = Math.abs(Math.sin(currentTime * p.pulse)) * 0.5;
+                    targetCtx.save();
+                    targetCtx.shadowBlur = p.radius * 2;
+                    targetCtx.shadowColor = p.color;
+                    targetCtx.fillStyle = p.color;
+                    targetCtx.beginPath();
+                    targetCtx.arc(p.x, p.y, p.radius * alpha, 0, Math.PI * 2);
+                    targetCtx.fill();
+                    targetCtx.restore();
+                });
+            }
+
+            else if (activeAnimationEffect === 'fireflies') {
+                // Efeito Pirilampos (Vagalumes)
+                if (particles.length < 60) {
+                    particles.push({
+                        x: Math.random() * defaultWidth,
+                        y: Math.random() * defaultHeight + defaultHeight,
+                        size: Math.random() * 5 + 2,
+                        speed: Math.random() * 30 + 20,
+                        frequency: Math.random() * 3 + 1,
+                        amplitude: Math.random() * 20 + 5,
+                        phase: Math.random() * 100,
+                        opacitySpeed: Math.random() * 2 + 1
+                    });
+                }
+
+                particles.forEach((p, index) => {
+                    p.y -= p.speed * delta;
+                    p.x += Math.sin(p.phase + currentTime * p.frequency) * p.amplitude * delta;
+
+                    if (p.y < -30) {
+                        particles[index] = {
+                            x: Math.random() * defaultWidth,
+                            y: defaultHeight + 20,
+                            size: Math.random() * 5 + 2,
+                            speed: Math.random() * 30 + 20,
+                            frequency: Math.random() * 3 + 1,
+                            amplitude: Math.random() * 20 + 5,
+                            phase: Math.random() * 100,
+                            opacitySpeed: Math.random() * 2 + 1
+                        };
+                    }
+
+                    const blink = Math.abs(Math.sin(currentTime * p.opacitySpeed)) * 0.7 + 0.3;
+                    targetCtx.save();
+                    targetCtx.shadowBlur = p.size * 3;
+                    targetCtx.shadowColor = 'rgba(234, 179, 8, 0.8)';
+                    targetCtx.fillStyle = `rgba(234, 179, 8, ${blink})`;
+                    targetCtx.beginPath();
+                    targetCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    targetCtx.fill();
+                    targetCtx.restore();
+                });
+            }
+
+            else if (activeAnimationEffect === 'rain-drops') {
+                if (particles.length < 120) {
+                    particles.push({
+                        x: Math.random() * defaultWidth,
+                        y: Math.random() * -defaultHeight,
+                        length: Math.random() * 40 + 20,
+                        speed: Math.random() * 1200 + 800,
+                        opacity: Math.random() * 0.3 + 0.1
+                    });
+                }
+
+                targetCtx.strokeStyle = 'rgba(156, 163, 175, 0.4)';
+                targetCtx.lineWidth = 1.5;
+                particles.forEach((p, index) => {
+                    p.y += p.speed * delta;
+                    p.x += (p.speed * 0.05) * delta;
+
+                    if (p.y > defaultHeight) {
+                        particles[index] = {
+                            x: Math.random() * defaultWidth,
+                            y: -50,
+                            length: Math.random() * 40 + 20,
+                            speed: Math.random() * 1200 + 800,
+                            opacity: Math.random() * 0.3 + 0.1
+                        };
+                    }
+
+                    targetCtx.save();
+                    targetCtx.globalAlpha = p.opacity;
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(p.x, p.y);
+                    targetCtx.lineTo(p.x + 2, p.y + p.length);
+                    targetCtx.stroke();
+                    targetCtx.restore();
+                });
+            }
+
+            else if (activeAnimationEffect === 'light-leaks') {
+                const leakX1 = defaultWidth * 0.1 + Math.sin(currentTime * 0.4) * 120;
+                const leakY1 = defaultHeight * 0.1 + Math.cos(currentTime * 0.3) * 100;
+                const radGrad1 = targetCtx.createRadialGradient(leakX1, leakY1, 30, leakX1, leakY1, 650);
+                radGrad1.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
+                radGrad1.addColorStop(0.4, 'rgba(249, 115, 22, 0.25)');
+                radGrad1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                
+                targetCtx.save();
+                targetCtx.fillStyle = radGrad1;
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+
+                const leakX2 = defaultWidth * 0.95 + Math.cos(currentTime * 0.5) * 150;
+                const leakY2 = defaultHeight * 0.85 + Math.sin(currentTime * 0.4) * 150;
+                const radGrad2 = targetCtx.createRadialGradient(leakX2, leakY2, 50, leakX2, leakY2, 800);
+                radGrad2.addColorStop(0, 'rgba(168, 85, 247, 0.35)');
+                radGrad2.addColorStop(0.5, 'rgba(236, 72, 153, 0.2)');
+                radGrad2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                targetCtx.fillStyle = radGrad2;
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+                targetCtx.restore();
+            }
+
+            else if (activeAnimationEffect === 'cyber-grid') {
+                targetCtx.save();
+                targetCtx.strokeStyle = 'rgba(168, 85, 247, 0.22)';
+                targetCtx.lineWidth = 3;
+                
+                const gridOffset = (currentTime * 120) % 150;
+                for(let y = gridOffset; y < defaultHeight; y += 150) {
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(0, y);
+                    targetCtx.lineTo(defaultWidth, y);
+                    targetCtx.stroke();
+                }
+
+                const centerX = defaultWidth / 2;
+                for(let x = -defaultWidth; x < defaultWidth * 2; x += 150) {
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(x + (currentTime * 10) % 150, 0);
+                    targetCtx.lineTo(x * 1.6 - centerX + (currentTime * 10) % 150, defaultHeight);
+                    targetCtx.stroke();
+                }
+                targetCtx.restore();
+            }
+
+            else if (activeAnimationEffect === 'vhs-glitch') {
+                if (Math.random() > 0.85) {
+                    targetCtx.save();
+                    targetCtx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                    targetCtx.fillRect(0, Math.random() * defaultHeight, defaultWidth, Math.random() * 100 + 20);
+                    targetCtx.restore();
+                }
+
+                targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                targetCtx.lineWidth = 2;
+                for (let i = 0; i < defaultHeight; i += 15) {
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(0, i + Math.sin(currentTime * 10) * 5);
+                    targetCtx.lineTo(defaultWidth, i + Math.sin(currentTime * 10) * 5);
+                    targetCtx.stroke();
+                }
+
+                targetCtx.fillStyle = '#ef4444';
+                targetCtx.font = '32px "Press Start 2P", monospace';
+                targetCtx.fillText("● REC", 80, 100);
+                
+                targetCtx.fillStyle = '#ffffff';
+                targetCtx.font = '28px "Press Start 2P", monospace';
+                targetCtx.fillText("VHS PLAY", 80, 160);
+                
+                const today = new Date();
+                const timeStr = today.toTimeString().split(' ')[0];
+                targetCtx.fillText(timeStr, defaultWidth - 360, defaultHeight - 100);
+            }
+        }
+
+        function drawStickers(targetCtx, showGuides = true) {
+            stickerLayers.forEach(sticker => {
+                targetCtx.save();
+                targetCtx.translate(sticker.x, sticker.y);
+
+                if (sticker.type === 'emoji') {
+                    targetCtx.font = `${sticker.size}px "Plus Jakarta Sans", sans-serif`;
+                    targetCtx.textAlign = 'center';
+                    targetCtx.textBaseline = 'middle';
+                    targetCtx.fillText(sticker.value, 0, 0);
+                } 
+                
+                else if (sticker.type === 'shape') {
+                    targetCtx.fillStyle = sticker.color || '#ffffff';
+                    targetCtx.strokeStyle = sticker.color || '#ffffff';
+                    targetCtx.lineWidth = 8;
+
+                    const s = sticker.size;
+
+                    if (sticker.value === 'heart') {
+                        targetCtx.beginPath();
+                        targetCtx.moveTo(0, s / 4);
+                        targetCtx.bezierCurveTo(0, -s / 3, -s / 2, -s / 3, -s / 2, s / 4);
+                        targetCtx.bezierCurveTo(-s / 2, s / 1.5, 0, s * 0.95, 0, s);
+                        targetCtx.bezierCurveTo(0, s * 0.95, s / 2, s / 1.5, s / 2, s / 4);
+                        targetCtx.bezierCurveTo(s / 2, -s / 3, 0, -s / 3, 0, s / 4);
+                        targetCtx.fill();
+                    } 
+                    
+                    else if (sticker.value === 'star') {
+                        targetCtx.beginPath();
+                        const spikes = 5;
+                        const outerRad = s / 2;
+                        const innerRad = s / 4;
+                        let rot = Math.PI / 2 * 3;
+                        let cx = 0, cy = 0;
+                        const step = Math.PI / spikes;
+
+                        targetCtx.moveTo(0, -outerRad);
+                        for (let i = 0; i < spikes; i++) {
+                            cx = Math.cos(rot) * outerRad;
+                            cy = Math.sin(rot) * outerRad;
+                            targetCtx.lineTo(cx, cy);
+                            rot += step;
+
+                            cx = Math.cos(rot) * innerRad;
+                            cy = Math.sin(rot) * innerRad;
+                            targetCtx.lineTo(cx, cy);
+                            rot += step;
+                        }
+                        targetCtx.lineTo(0, -outerRad);
+                        targetCtx.closePath();
+                        targetCtx.fill();
+                    } 
+                    
+                    else if (sticker.value === 'circle-highlight') {
+                        targetCtx.beginPath();
+                        targetCtx.setLineDash([20, 15]);
+                        targetCtx.arc(0, 0, s / 2, 0, Math.PI * 2);
+                        targetCtx.stroke();
+                    } 
+                    
+                    else if (sticker.value === 'badge-retro') {
+                        targetCtx.beginPath();
+                        const points = 16;
+                        for (let i = 0; i < points; i++) {
+                            const angle = (i / points) * Math.PI * 2;
+                            const radius = i % 2 === 0 ? s / 2 : s / 2.3;
+                            const x = Math.cos(angle) * radius;
+                            const y = Math.sin(angle) * radius;
+                            if (i === 0) targetCtx.moveTo(x, y);
+                            else targetCtx.lineTo(x, y);
+                        }
+                        targetCtx.closePath();
+                        targetCtx.fill();
+                    }
+                }
+
+                targetCtx.restore();
+
+                // Desenhar Guia e Botão de Redimensionamento ao Selecionar
+                if (showGuides && selectedStickerId === sticker.id && !isPhonePreviewActive) {
+                    targetCtx.save();
+                    targetCtx.translate(sticker.x, sticker.y);
+                    targetCtx.strokeStyle = 'rgba(168, 85, 247, 0.7)';
+                    targetCtx.lineWidth = 3;
+                    targetCtx.setLineDash([10, 8]);
+                    
+                    const pad = sticker.size / 2 + 10;
+                    targetCtx.strokeRect(-pad, -pad, pad * 2, pad * 2);
+
+                    targetCtx.fillStyle = '#a855f7';
+                    targetCtx.setLineDash([]);
+                    targetCtx.beginPath();
+                    targetCtx.arc(pad, pad, 18, 0, Math.PI * 2);
+                    targetCtx.fill();
+
+                    targetCtx.fillStyle = '#ffffff';
+                    targetCtx.font = '14px "Plus Jakarta Sans"';
+                    targetCtx.textAlign = 'center';
+                    targetCtx.textBaseline = 'middle';
+                    targetCtx.fillText('↔', pad, pad);
+
+                    targetCtx.restore();
+                }
+            });
+        }
+
+        function drawTexts(targetCtx, showGuides = true) {
+            textLayers.forEach(layer => {
+                targetCtx.save();
+                
+                let animatedY = layer.y;
+                let scale = 1;
+
+                if (layer.animation === 'float') {
+                    animatedY += Math.sin(currentTime * 3) * 30;
+                } else if (layer.animation === 'pulse') {
+                    scale = 1 + Math.sin(currentTime * 5) * 0.05;
+                } else if (layer.animation === 'shake') {
+                    animatedY += (Math.random() - 0.5) * 12;
+                    targetCtx.translate((Math.random() - 0.5) * 12, 0);
+                }
+
+                targetCtx.translate(layer.x, animatedY);
+                targetCtx.scale(scale, scale);
+
+                const boldPrefix = layer.bold ? 'bold ' : '';
+                const fontStr = `${boldPrefix}${layer.fontSize}px "${layer.fontFamily}", sans-serif`;
+                const boxWidth = layer.width || 800;
+                const textAlign = layer.align || 'center';
+                const lineHeight = layer.fontSize * 1.25;
+
+                const lines = getWrappedLines(targetCtx, layer.text, boxWidth, fontStr);
+
+                targetCtx.font = fontStr;
+                targetCtx.textAlign = textAlign;
+                targetCtx.textBaseline = 'middle';
+
+                if (layer.shadow) {
+                    targetCtx.shadowColor = layer.shadowColor || '#a855f7';
+                    targetCtx.shadowBlur = 30;
+                    targetCtx.shadowOffsetX = 0;
+                    targetCtx.shadowOffsetY = 0;
+                } else {
+                    targetCtx.shadowBlur = 0;
+                }
+
+                if (layer.animation === 'rainbow') {
+                    const rainbowGrad = targetCtx.createLinearGradient(-boxWidth/2, 0, boxWidth/2, 0);
+                    const shift = (currentTime * 120) % 360;
+                    rainbowGrad.addColorStop(0, `hsl(${shift % 360}, 100%, 70%)`);
+                    rainbowGrad.addColorStop(0.5, `hsl(${(shift + 120) % 360}, 100%, 70%)`);
+                    rainbowGrad.addColorStop(1, `hsl(${(shift + 240) % 360}, 100%, 70%)`);
+                    targetCtx.fillStyle = rainbowGrad;
+                } else {
+                    targetCtx.fillStyle = layer.color;
+                }
+
+                const totalHeight = lines.length * lineHeight;
+                const startY = -totalHeight / 2 + lineHeight / 2;
+
+                lines.forEach((line, lineIndex) => {
+                    let lineX = 0;
+                    if (textAlign === 'left') {
+                        lineX = -boxWidth / 2;
+                    } else if (textAlign === 'right') {
+                        lineX = boxWidth / 2;
+                    }
+                    const lineY = startY + (lineIndex * lineHeight);
+                    targetCtx.fillText(line, lineX, lineY);
+                });
+
+                targetCtx.restore();
+
+                // Desenhar borda de marcação guia ao redor da caixa de texto
+                if (showGuides && selectedTextId === layer.id && !isPhonePreviewActive) {
+                    targetCtx.save();
+                    targetCtx.translate(layer.x, animatedY);
+                    targetCtx.scale(scale, scale);
+
+                    targetCtx.strokeStyle = 'rgba(168, 85, 247, 0.65)';
+                    targetCtx.lineWidth = 3;
+                    targetCtx.setLineDash([15, 10]);
+                    
+                    const totalHeight = lines.length * lineHeight;
+                    const padding = 20;
+
+                    targetCtx.strokeRect(
+                        -boxWidth / 2 - padding, 
+                        -totalHeight / 2 - padding, 
+                        boxWidth + (padding * 2), 
+                        totalHeight + (padding * 2)
+                    );
+
+                    targetCtx.fillStyle = '#a855f7';
+                    targetCtx.setLineDash([]);
+                    targetCtx.beginPath();
+                    const rx = boxWidth / 2 + padding;
+                    const ry = totalHeight / 2 + padding;
+                    targetCtx.arc(rx, ry, 18, 0, Math.PI * 2);
+                    targetCtx.fill();
+
+                    targetCtx.fillStyle = '#ffffff';
+                    targetCtx.font = '14px "Plus Jakarta Sans"';
+                    targetCtx.textAlign = 'center';
+                    targetCtx.textBaseline = 'middle';
+                    targetCtx.fillText('↔', rx, ry);
+
+                    targetCtx.restore();
+                }
+            });
+        }
+
+        // --- SISTEMA DE SALVAMENTO DE PROJETOS E BACKUP (IndexedDB & Local Storage) ---
+        function saveCurrentToProjects() {
+            if (!db) {
+                showToast("Erro: Banco de dados local indisponível.", true);
+                return;
+            }
+
+            const projectData = {
+                id: 'proj-' + Date.now(),
+                name: 'Story_' + new Date().toLocaleDateString() + '_' + new Date().toLocaleTimeString(),
+                animationDuration: animationDuration, // Salvando duração customizada
+                mediaType: mediaFile.type,
+                mediaScale: mediaFile.scale,
+                mediaYOffset: mediaFile.yOffset,
+                solidColor: mediaFile.color || null,
+                backgroundImageBase64: mediaFile.type === 'image' ? mediaFile.originalData : null,
+                backgroundVideoBase64: mediaFile.type === 'video' ? mediaFile.originalData : null,
+                textLayers: textLayers,
+                stickerLayers: stickerLayers,
+                selectedFilter: selectedFilter,
+                activeAnimationEffect: activeAnimationEffect,
+                audioTracks: audioTracks.map(track => ({
+                    id: track.id,
+                    name: track.name,
+                    originalData: track.originalData,
+                    volume: track.volume
+                })),
+                savedAt: Date.now()
+            };
+
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.put(projectData);
+
+            request.onsuccess = () => {
+                showToast("Projeto salvo localmente no banco de dados!");
+                loadProjectList();
+            };
+
+            request.onerror = () => {
+                showToast("Erro ao salvar rascunho.", true);
+            };
+        }
+
+        function loadProjectList() {
+            if (!db) return;
+
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = (e) => {
+                const list = e.target.result;
+                const container = document.getElementById('savedProjectsList');
+                container.innerHTML = '';
+
+                if (list.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-4">Nenhum rascunho salvo localmente.</p>`;
+                    return;
+                }
+
+                list.sort((a, b) => b.savedAt - a.savedAt).forEach(proj => {
+                    const card = document.createElement('div');
+                    card.className = "bg-zinc-950 p-3 rounded-xl border border-zinc-800 flex items-center justify-between gap-2";
+                    card.innerHTML = `
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-xs font-semibold text-zinc-200 truncate">${proj.name}</h4>
+                            <p class="text-[9px] text-zinc-500">${new Date(proj.savedAt).toLocaleString()}</p>
+                        </div>
+                        <div class="flex gap-1.5 shrink-0">
+                            <button onclick="restoreProject('${proj.id}')" class="bg-purple-600/20 text-purple-400 hover:bg-purple-600 hover:text-white p-1.5 rounded-lg transition" title="Abrir">
+                                <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteProject('${proj.id}')" class="bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white p-1.5 rounded-lg transition" title="Excluir">
+                                <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+                initLucide();
+            };
+        }
+
+        function restoreProject(projectId) {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(projectId);
+
+            request.onsuccess = (e) => {
+                const proj = e.target.result;
+                if (!proj) return;
+
+                // Restaurar duração
+                animationDuration = proj.animationDuration || 60;
+                const durationSlider = document.getElementById('storyDurationSlider');
+                if (durationSlider) {
+                    durationSlider.value = animationDuration;
+                    document.getElementById('storyDurationVal').innerText = animationDuration + 's';
+                }
+
+                if (proj.mediaType === 'image' && proj.backgroundImageBase64) {
+                    const img = new Image();
+                    img.onload = function() {
+                        mediaFile = {
+                            type: 'image',
+                            src: img,
+                            originalData: proj.backgroundImageBase64,
+                            scale: proj.mediaScale || 1,
+                            yOffset: proj.mediaYOffset || 0
+                        };
+                    };
+                    img.src = proj.backgroundImageBase64;
+                } else if (proj.mediaType === 'video' && proj.backgroundVideoBase64) {
+                    const video = document.createElement('video');
+                    video.src = proj.backgroundVideoBase64;
+                    video.muted = true;
+                    video.loop = true;
+                    video.playsInline = true;
+                    video.onloadeddata = function() {
+                        mediaFile = {
+                            type: 'video',
+                            src: video,
+                            originalData: proj.backgroundVideoBase64,
+                            scale: proj.mediaScale || 1,
+                            yOffset: proj.mediaYOffset || 0
+                        };
+                        video.play();
+                    };
+                } else if (proj.mediaType === 'gradient') {
+                    mediaFile = { type: 'gradient', scale: proj.mediaScale, yOffset: proj.mediaYOffset };
+                } else {
+                    mediaFile = { type: 'color', color: proj.solidColor || '#18181b', scale: proj.mediaScale, yOffset: proj.mediaYOffset };
+                }
+
+                textLayers = proj.textLayers || [];
+                stickerLayers = proj.stickerLayers || [];
+                selectedTextId = textLayers.length > 0 ? textLayers[0].id : null;
+                selectedStickerId = stickerLayers.length > 0 ? stickerLayers[0].id : null;
+                selectedFilter = proj.selectedFilter || 'none';
+                activeAnimationEffect = proj.activeAnimationEffect || 'none';
+
+                // Reconstruir mixadora de áudio
+                audioTracks.forEach(track => { if (track.src) track.src.pause(); });
+                audioTracks = [];
+
+                if (proj.audioTracks && proj.audioTracks.length > 0) {
+                    proj.audioTracks.forEach(tData => {
+                        const audio = new Audio(tData.originalData);
+                        audio.loop = true;
+                        audio.volume = tData.volume;
+                        audioTracks.push({
+                            id: tData.id,
+                            name: tData.name,
+                            src: audio,
+                            originalData: tData.originalData,
+                            volume: tData.volume
+                        });
+                    });
+                }
+
+                updateTextListUI();
+                updateStickerListUI();
+                updateAudioTracksUI();
+                
+                showToast("Rascunho restaurado com sucesso!");
+                isPlaying = false;
+                updateAudioPlaybackUI();
+            };
+        }
+
+        function deleteProject(projectId) {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(projectId);
+
+            request.onsuccess = () => {
+                showToast("Rascunho removido.");
+                loadProjectList();
+            };
+        }
+
+        // --- SISTEMA DE BACKUP GERAL (EXPORTAR/IMPORTAR ARQUIVO JSON) ---
+        function openBackupModal() {
+            document.getElementById('backupModal').classList.remove('hidden');
+        }
+
+        function closeBackupModal() {
+            document.getElementById('backupModal').classList.add('hidden');
+        }
+
+        function downloadBackupFile() {
+            const backupState = {
+                appName: "StoryCraft Studio Backup",
+                version: "1.0",
+                backupDate: Date.now(),
+                data: {
+                    animationDuration: animationDuration,
+                    mediaFile: {
+                        type: mediaFile.type,
+                        scale: mediaFile.scale,
+                        yOffset: mediaFile.yOffset,
+                        color: mediaFile.color || null,
+                        originalData: (mediaFile.type === 'image' || mediaFile.type === 'video') ? mediaFile.originalData : null
+                    },
+                    textLayers: textLayers,
+                    stickerLayers: stickerLayers,
+                    selectedFilter: selectedFilter,
+                    activeAnimationEffect: activeAnimationEffect,
+                    audioTracks: audioTracks.map(track => ({
+                        id: track.id,
+                        name: track.name,
+                        originalData: track.originalData,
+                        volume: track.volume
+                    }))
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(backupState)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `STORYCRAFT_BACKUP_${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("Backup baixado com sucesso!");
+        }
+
+        function uploadBackupFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const payload = JSON.parse(e.target.result);
+                    if (payload.appName !== "StoryCraft Studio Backup") {
+                        showToast("Arquivo de backup inválido ou incompatível.", true);
+                        return;
+                    }
+
+                    const stateData = payload.data;
+                    
+                    // Restaurar duração
+                    animationDuration = stateData.animationDuration || 60;
+                    const durationSlider = document.getElementById('storyDurationSlider');
+                    if (durationSlider) {
+                        durationSlider.value = animationDuration;
+                        document.getElementById('storyDurationVal').innerText = animationDuration + 's';
+                    }
+
+                    if (stateData.mediaFile.type === 'image' && stateData.mediaFile.originalData) {
+                        const img = new Image();
+                        img.onload = function() {
+                            mediaFile = {
+                                type: 'image',
+                                src: img,
+                                originalData: stateData.mediaFile.originalData,
+                                scale: stateData.mediaFile.scale || 1,
+                                yOffset: stateData.mediaFile.yOffset || 0
+                            };
+                        };
+                        img.src = stateData.mediaFile.originalData;
+                    } else if (stateData.mediaFile.type === 'video' && stateData.mediaFile.originalData) {
+                        const video = document.createElement('video');
+                        video.src = stateData.mediaFile.originalData;
+                        video.muted = true;
+                        video.loop = true;
+                        video.playsInline = true;
+                        video.onloadeddata = function() {
+                            mediaFile = {
+                                type: 'video',
+                                src: video,
+                                originalData: stateData.mediaFile.originalData,
+                                scale: stateData.mediaFile.scale || 1,
+                                yOffset: stateData.mediaFile.yOffset || 0
+                            };
+                            video.play();
+                        };
+                    } else if (stateData.mediaFile.type === 'gradient') {
+                        mediaFile = { type: 'gradient', scale: stateData.mediaFile.scale, yOffset: stateData.mediaFile.yOffset };
+                    } else {
+                        mediaFile = { type: 'color', color: stateData.mediaFile.color || '#18181b', scale: stateData.mediaFile.scale, yOffset: stateData.mediaFile.yOffset };
+                    }
+
+                    textLayers = stateData.textLayers || [];
+                    stickerLayers = stateData.stickerLayers || [];
+                    selectedTextId = textLayers.length > 0 ? textLayers[0].id : null;
+                    selectedStickerId = stickerLayers.length > 0 ? stickerLayers[0].id : null;
+                    selectedFilter = stateData.selectedFilter || 'none';
+                    activeAnimationEffect = stateData.activeAnimationEffect || 'none';
+
+                    audioTracks.forEach(track => { if (track.src) track.src.pause(); });
+                    audioTracks = [];
+
+                    if (stateData.audioTracks && stateData.audioTracks.length > 0) {
+                        stateData.audioTracks.forEach(tData => {
+                            const audio = new Audio(tData.originalData);
+                            audio.loop = true;
+                            audio.volume = tData.volume;
+                            audioTracks.push({
+                                id: tData.id,
+                                name: tData.name,
+                                src: audio,
+                                originalData: tData.originalData,
+                                volume: tData.volume
+                            });
+                        });
+                    }
+
+                    updateTextListUI();
+                    updateStickerListUI();
+                    updateAudioTracksUI();
+                    closeBackupModal();
+                    showToast("Área de trabalho restaurada do arquivo com sucesso!");
+                    isPlaying = false;
+                    updateAudioPlaybackUI();
+                } catch(err) {
+                    console.error(err);
+                    showToast("Falha ao ler arquivo de backup.", true);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- EXPORTAR DE STORY FINAL (FOTO OU GRAVAÇÃO DE VÍDEO COMPLETA) ---
+        function exportMedia() {
+            const needsVideo = (mediaFile.type === 'video' || activeAnimationEffect !== 'none' || audioTracks.length > 0);
+            
+            if (needsVideo) {
+                exportAsVideo();
+            } else {
+                exportAsImage();
+            }
+        }
+
+        function exportAsImage() {
+            const dataURL = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataURL;
+            a.download = `STORYCRAFT_STORY_${Date.now()}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("Foto de Story salva com sucesso!");
+        }
+
+        async function exportAsVideo() {
+            if (!('MediaRecorder' in window)) {
+                showToast("Gravação de vídeo não suportada neste navegador. Baixando como imagem.", true);
+                exportAsImage();
+                return;
+            }
+
+            const exportModal = document.getElementById('exportModal');
+            const exportProgressBar = document.getElementById('exportProgressBar');
+            const exportProgressText = document.getElementById('exportProgressText');
+            
+            exportModal.classList.remove('hidden');
+            isPlaying = false;
+            currentTime = 0;
+
+            const stream = canvas.captureStream(30);
+            const tracks = [...stream.getVideoTracks()];
+
+            let mediaRecorder;
+            let chunks = [];
+            let audioCtx;
+            let streamDest;
+
+            try {
+                // Se houver áudio, mistura todas as faixas respeitando os volumes individuais configurados
+                if (audioTracks.length > 0) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    streamDest = audioCtx.createMediaStreamDestination();
+                    
+                    audioTracks.forEach(track => {
+                        if (track.src) {
+                            track.src.currentTime = 0;
+                            track.src.muted = false;
+
+                            const audioSource = audioCtx.createMediaElementSource(track.src);
+                            const gainNode = audioCtx.createGain();
+                            
+                            gainNode.gain.setValueAtTime(track.volume, audioCtx.currentTime);
+                            
+                            audioSource.connect(gainNode);
+                            gainNode.connect(streamDest);
+                            gainNode.connect(audioCtx.destination);
+                        }
+                    });
+
+                    const mixedAudioTracks = streamDest.stream.getAudioTracks();
+                    if (mixedAudioTracks.length > 0) {
+                        tracks.push(mixedAudioTracks[0]);
+                    }
+                }
+
+                const combinedStream = new MediaStream(tracks);
+                
+                const options = { mimeType: 'video/webm;codecs=vp9' };
+                try {
+                    mediaRecorder = new MediaRecorder(combinedStream, options);
+                } catch(e) {
+                    mediaRecorder = new MediaRecorder(combinedStream);
+                }
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/mp4' });
+                    const videoURL = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement('a');
+                    a.href = videoURL;
+                    a.download = `STORYCRAFT_STORY_${Date.now()}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    audioTracks.forEach(track => {
+                        if (track.src) {
+                            track.src.pause();
+                            track.src.currentTime = 0;
+                        }
+                    });
+
+                    if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
+                        mediaFile.src.pause();
+                        mediaFile.src.currentTime = 0;
+                    }
+
+                    exportModal.classList.add('hidden');
+                    showToast("Vídeo exportado e salvo!");
+                };
+
+                mediaRecorder.start();
+                isPlaying = true;
+                
+                audioTracks.forEach(track => {
+                    if (track.src) {
+                        track.src.volume = track.volume;
+                        track.src.play().catch(()=>{});
+                    }
+                });
+
+                if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
+                    mediaFile.src.play().catch(()=>{});
+                }
+
+                // Duração dinâmica da gravação de acordo com o slider de tempo escolhido
+                const recordDuration = animationDuration * 1000;
+                let elapsed = 0;
+                const progressInterval = setInterval(() => {
+                    elapsed += 250;
+                    const percent = Math.min((elapsed / recordDuration) * 100, 100);
+                    exportProgressBar.style.width = `${percent}%`;
+                    exportProgressText.innerText = `Processando: ${Math.floor(percent)}%`;
+
+                    if (elapsed >= recordDuration) {
+                        clearInterval(progressInterval);
+                        isPlaying = false;
+                        mediaRecorder.stop();
+                        if (audioCtx) audioCtx.close();
+                    }
+                }, 250);
+
+            } catch (err) {
+                console.error("Erro na gravação: ", err);
+                exportModal.classList.add('hidden');
+                showToast("Erro ao processar as trilhas no mixador de exportação.", true);
+            }
+        }
+
+        // --- FEEDBACKS EM TOASTS ---
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-2 px-4 py-3 rounded-xl border text-xs font-semibold shadow-2xl transition-all duration-300 transform translate-y-10 opacity-0 ${isError ? 'bg-red-950/90 border-red-800 text-red-200' : 'bg-zinc-900/90 border-zinc-800 text-zinc-100'}`;
+            toast.innerHTML = `
+                <i data-lucide="${isError ? 'alert-triangle' : 'check-circle'}" class="w-4 h-4 ${isError ? 'text-red-400' : 'text-purple-400'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            initLucide();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // --- SUPORTE COMPLETO A PWA OFFLINE ---
+        function registerStoryPWA() {
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    const CACHE_NAME = 'storycraft-v1';
+                    const ASSETS = [
+                        '/',
+                        window.location.href
+                    ];
+
+                    self.addEventListener('install', (e) => {
+                        e.waitUntil(
+                            caches.open(CACHE_NAME).then((cache) => {
+                                return cache.addAll(ASSETS);
+                            })
+                        );
+                    });
+
+                    self.addEventListener('fetch', (e) => {
+                        e.respondWith(
+                            caches.match(e.request).then((cachedResponse) => {
+                                return cachedResponse || fetch(e.request);
+                            })
+                        );
+                    });
+                `;
+                
+                const blob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                
+                navigator.serviceWorker.register(swUrl)
+                    .then(() => console.log("PWA Service Worker registrado com sucesso!"))
+                    .catch(err => console.warn("Falha ao registrar Service Worker do PWA", err));
+            }
+
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                const pwaBtn = document.getElementById('pwaInstallBtn');
+                pwaBtn.classList.remove('hidden');
+
+                pwaBtn.addEventListener('click', () => {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            showToast("StoryCraft Studio Installed!");
+                            pwaBtn.classList.add('hidden');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+            });
+        }
+    </script>
+</body>
+</html>
