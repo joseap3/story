@@ -519,6 +519,13 @@
         let isPhonePreviewActive = false;
         let autoSyncEnabled = false;
 
+        // Variáveis de Controle e Sincronização do Motor de Gravação de Vídeo
+        let isExporting = false;
+        let exportRecorder = null;
+        let exportAudioCtx = null;
+        let exportTempAudios = [];
+        let exportChunks = [];
+
         // Controle de Voz / Locução
         let mediaRecorderVoice = null;
         let voiceChunks = [];
@@ -761,7 +768,7 @@
             showToast(`Preset "${presetType}" aplicado!`);
         }
 
-        // --- ARRASTAR E REDIMENSIONAR NO CANVAS ---
+        // --- ARRASTAR E REDIMENSIONAR NO CANVAS COM DESELEÇÃO ---
         function setupCanvasInteractions() {
             const handleStart = (clientX, clientY) => {
                 const rect = canvas.getBoundingClientRect();
@@ -769,6 +776,8 @@
                 const scaleY = canvas.height / rect.height;
                 const canvasX = (clientX - rect.left) * scaleX;
                 const canvasY = (clientY - rect.top) * scaleY;
+
+                let clickedAnyElement = false;
 
                 for (let i = textLayers.length - 1; i >= 0; i--) {
                     const el = textLayers[i];
@@ -788,6 +797,7 @@
                         resizeStartWidth = el.width || 600;
                         selectedTextId = el.id;
                         updateTextListUI();
+                        clickedAnyElement = true;
                         return;
                     }
 
@@ -798,8 +808,15 @@
                         dragOffsetY = canvasY - el.y;
                         selectedTextId = el.id;
                         updateTextListUI();
+                        clickedAnyElement = true;
                         return;
                     }
+                }
+
+                // Se clicou no canvas mas não em nenhum elemento ativo, deseleciona tudo para limpar o design!
+                if (!clickedAnyElement) {
+                    selectedTextId = null;
+                    updateTextListUI();
                 }
             };
 
@@ -979,6 +996,7 @@
             document.getElementById('stickersModal').classList.add('hidden');
         }
 
+        // --- ADICIONAR EMOJI E FORMAL ---
         function addStickerElement(emoji) {
             const newSticker = {
                 id: 'sticker-' + Date.now(),
@@ -1053,9 +1071,10 @@
                 const isSelected = selectedTextId === layer.id;
                 const card = document.createElement('div');
                 card.className = `bg-zinc-950 p-3 rounded-xl border transition-all space-y-3 relative ${isSelected ? 'border-purple-500 ring-1 ring-purple-500' : 'border-zinc-850'}`;
-                card.onclick = () => {
+                card.onclick = (event) => {
                     selectedTextId = layer.id;
                     updateTextListHighlight();
+                    event.stopPropagation(); // Evita deselecionar ao clicar no card de controle lateral
                 };
 
                 if (layer.type === 'text') {
@@ -1513,22 +1532,49 @@
             if (isPlaying) {
                 currentTime += delta;
                 
-                if (currentTime >= animationDuration) {
-                    currentTime = 0;
-                    if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
-                        mediaFile.src.currentTime = 0;
+                if (isExporting) {
+                    // Atualiza a barra de progresso visual de forma fluida baseada no tempo do loop
+                    const percent = Math.min((currentTime / animationDuration) * 100, 100);
+                    document.getElementById('exportProgressBar').style.width = `${percent}%`;
+                    document.getElementById('exportProgressText').innerText = `Processando: ${Math.floor(percent)}%`;
+
+                    // Interrupção e parada do recorder exatamente no milissegundo de duração do Story
+                    if (currentTime >= animationDuration) {
+                        currentTime = animationDuration;
+                        isPlaying = false;
+                        isExporting = false;
+                        
+                        if (exportRecorder && exportRecorder.state !== 'inactive') {
+                            exportRecorder.stop();
+                        }
+                        if (exportAudioCtx) {
+                            exportAudioCtx.close();
+                        }
                     }
-                    playAllAudioTracksSnyced();
+                } else {
+                    // Loop comum infinito quando não está exportando
+                    if (currentTime >= animationDuration) {
+                        currentTime = 0;
+                        if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
+                            mediaFile.src.currentTime = 0;
+                        }
+                        playAllAudioTracksSnyced();
+                    }
                 }
 
-                // Sincronizar limites de tempo do áudio
-                audioTracks.forEach(track => {
-                    const relativeAudioTime = track.startTime + currentTime;
-                    if (relativeAudioTime >= track.endTime) {
-                        track.src.pause();
-                    } else if (track.src.paused) {
-                        track.src.currentTime = relativeAudioTime;
-                        track.src.play().catch(()=>{});
+                // Sincronizar limites de tempo do áudio (usando as faixas temporárias limpas se estiver exportando)
+                const activeAudios = isExporting ? exportTempAudios : audioTracks.map(t => ({ src: t.src, startTime: t.startTime, endTime: t.endTime }));
+                activeAudios.forEach(track => {
+                    const trackSrc = isExporting ? track.audio : track.src;
+                    const trackStart = isExporting ? track.start : track.startTime;
+                    const trackEnd = isExporting ? track.end : track.endTime;
+
+                    const relativeAudioTime = trackStart + currentTime;
+                    if (relativeAudioTime >= trackEnd) {
+                        trackSrc.pause();
+                    } else if (trackSrc.paused && isPlaying) {
+                        trackSrc.currentTime = relativeAudioTime;
+                        trackSrc.play().catch(()=>{});
                     }
                 });
             }
@@ -1546,14 +1592,16 @@
             drawBackground(ctx);
             applyColorFilters(ctx);
             drawOverlayEffects(ctx, delta);
-            drawTexts(ctx, true);
+            
+            // INTELIGENTE: Se estiver exportando (isExporting), ocultamos completamente as guias e caixas pontilhadas!
+            drawTexts(ctx, !isExporting);
 
             if (isPhonePreviewActive) {
                 previewCtx.clearRect(0, 0, defaultWidth, defaultHeight);
                 drawBackground(previewCtx);
                 applyColorFilters(previewCtx);
                 drawOverlayEffects(previewCtx, delta);
-                drawTexts(previewCtx, false); // Não desenhar marcações de edição no preview do celular
+                drawTexts(previewCtx, false); // Nunca desenhar marcações de edição no preview do celular
             }
 
             requestAnimationFrame(renderLoop);
@@ -2180,6 +2228,7 @@
             };
         }
 
+        // --- EXCLUIR PROJETO ---
         function deleteProject(projectId) {
             const transaction = db.transaction([STORE_NAME], 'readwrite');
             const store = transaction.objectStore(STORE_NAME);
@@ -2335,7 +2384,7 @@
             reader.readAsText(file);
         }
 
-        // --- EXPORTAÇÃO DINÂMICA COMPLETA (FOTO OU GRAVAÇÃO DE VIDEO) ---
+        // --- EXPORTAÇÃO DINÂMICA COMPLETA ---
         function exportMedia() {
             const needsVideo = (mediaFile.type === 'video' || activeAnimationEffect !== 'none' || audioTracks.length > 0);
             
@@ -2347,6 +2396,17 @@
         }
 
         function exportAsImage() {
+            // Garante que o Canvas salve uma imagem limpa sem o pontilhado selecionado
+            const prevSelectedId = selectedTextId;
+            selectedTextId = null;
+            
+            // Renderiza 1 frame limpo antes do snapshot
+            ctx.clearRect(0, 0, defaultWidth, defaultHeight);
+            drawBackground(ctx);
+            applyColorFilters(ctx);
+            drawOverlayEffects(ctx, 0);
+            drawTexts(ctx, false);
+
             const dataURL = canvas.toDataURL('image/png');
             const a = document.createElement('a');
             a.href = dataURL;
@@ -2354,6 +2414,9 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
+            
+            // Restaura a seleção do editor
+            selectedTextId = prevSelectedId;
             showToast("Foto do Story salva!");
         }
 
@@ -2365,42 +2428,37 @@
             }
 
             const exportModal = document.getElementById('exportModal');
-            const exportProgressBar = document.getElementById('exportProgressBar');
-            const exportProgressText = document.getElementById('exportProgressText');
             
             exportModal.classList.remove('hidden');
             isPlaying = false;
             currentTime = 0;
+            isExporting = true;
+            exportChunks = []; // Reseta o container de dados capturados
 
             const stream = canvas.captureStream(30);
             const tracks = [...stream.getVideoTracks()];
 
-            let mediaRecorder;
-            let chunks = [];
-            let audioCtx;
-            let streamDest;
-            let tempAudios = []; // Armazenamento temporário de novas instâncias de Audio limpas para evitar erros de nó conectado
+            exportTempAudios = [];
 
             try {
                 if (audioTracks.length > 0) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    streamDest = audioCtx.createMediaStreamDestination();
+                    exportAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const streamDest = exportAudioCtx.createMediaStreamDestination();
                     
                     audioTracks.forEach(track => {
-                        // Instanciamos uma versão nova do áudio para não conflitar com conexões Web Audio ativas do workspace
                         const tempAudio = new Audio(track.originalData);
                         tempAudio.currentTime = track.startTime;
                         tempAudio.volume = track.volume;
                         tempAudio.muted = false;
-                        tempAudios.push({ audio: tempAudio, start: track.startTime, end: track.endTime });
+                        exportTempAudios.push({ audio: tempAudio, start: track.startTime, end: track.endTime });
 
-                        const sourceNode = audioCtx.createMediaElementSource(tempAudio);
-                        const gainNode = audioCtx.createGain();
-                        gainNode.gain.setValueAtTime(track.volume, audioCtx.currentTime);
+                        const sourceNode = exportAudioCtx.createMediaElementSource(tempAudio);
+                        const gainNode = exportAudioCtx.createGain();
+                        gainNode.gain.setValueAtTime(track.volume, exportAudioCtx.currentTime);
                         
                         sourceNode.connect(gainNode);
                         gainNode.connect(streamDest);
-                        gainNode.connect(audioCtx.destination);
+                        gainNode.connect(exportAudioCtx.destination);
                     });
 
                     const audioTracksFromDest = streamDest.stream.getAudioTracks();
@@ -2413,22 +2471,22 @@
                 
                 let options = { mimeType: 'video/webm;codecs=vp9' };
                 try {
-                    mediaRecorder = new MediaRecorder(combinedStream, options);
+                    exportRecorder = new MediaRecorder(combinedStream, options);
                 } catch(e) {
                     try {
                         options = { mimeType: 'video/webm' };
-                        mediaRecorder = new MediaRecorder(combinedStream, options);
+                        exportRecorder = new MediaRecorder(combinedStream, options);
                     } catch(err2) {
-                        mediaRecorder = new MediaRecorder(combinedStream);
+                        exportRecorder = new MediaRecorder(combinedStream);
                     }
                 }
 
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) chunks.push(e.data);
+                exportRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) exportChunks.push(e.data);
                 };
 
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'video/mp4' });
+                exportRecorder.onstop = () => {
+                    const blob = new Blob(exportChunks, { type: 'video/mp4' });
                     const videoURL = URL.createObjectURL(blob);
                     
                     const a = document.createElement('a');
@@ -2438,8 +2496,8 @@
                     a.click();
                     document.body.removeChild(a);
 
-                    // Desligar os áudios temporários
-                    tempAudios.forEach(item => item.audio.pause());
+                    // Desligar os áudios temporários criados para a exportação
+                    exportTempAudios.forEach(item => item.audio.pause());
 
                     if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                         mediaFile.src.pause();
@@ -2450,37 +2508,25 @@
                     showToast("Story exportado com sucesso!");
                 };
 
-                mediaRecorder.start();
+                // Inicia gravação e reprodução sincronizada
+                exportRecorder.start();
                 isPlaying = true;
                 
-                // Dar play nas faixas de som temporárias sincronizadas de exportação
-                tempAudios.forEach(item => {
+                // Dispara os áudios criados para a exportação
+                exportTempAudios.forEach(item => {
                     item.audio.play().catch(()=>{});
                 });
 
                 if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
+                    mediaFile.src.currentTime = 0;
                     mediaFile.src.play().catch(()=>{});
                 }
-
-                const recordDuration = animationDuration * 1000;
-                let elapsed = 0;
-                const progressInterval = setInterval(() => {
-                    elapsed += 250;
-                    const percent = Math.min((elapsed / recordDuration) * 100, 100);
-                    exportProgressBar.style.width = `${percent}%`;
-                    exportProgressText.innerText = `Processando: ${Math.floor(percent)}%`;
-
-                    if (elapsed >= recordDuration) {
-                        clearInterval(progressInterval);
-                        isPlaying = false;
-                        mediaRecorder.stop();
-                        if (audioCtx) audioCtx.close();
-                    }
-                }, 250);
 
             } catch (err) {
                 console.error("Erro na gravação: ", err);
                 exportModal.classList.add('hidden');
+                isExporting = false;
+                isPlaying = false;
                 showToast("Erro ao processar áudio na exportação.", true);
             }
         }
