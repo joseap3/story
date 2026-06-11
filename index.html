@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StoryCraft Studio - PWA</title>
+    <title>StoryCraft Studio Pro - PWA</title>
     <!-- Tailwind CSS para um design elegante e ultra-moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons para interface moderna -->
@@ -23,9 +23,8 @@
         .story-viewport {
             aspect-ratio: 9/16;
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
             box-shadow: 0 25px 50px -12px rgba(168, 85, 247, 0.25);
-            touch-action: none; /* Previne rolagem de página ao arrastar elementos no celular */
         }
 
         /* Custom scrollbar para visual limpo */
@@ -100,9 +99,9 @@
             </div>
             <div>
                 <h1 class="text-md font-extrabold tracking-tight bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-                    STORYCRAFT
+                    STORYCRAFT PRO
                 </h1>
-                <p class="text-[10px] text-zinc-400 font-medium">Estúdio Criativo Mobile</p>
+                <p class="text-[10px] text-zinc-400 font-medium font-mono">Estúdio Avançado Multicanais</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
@@ -132,35 +131,35 @@
                 <canvas id="storyCanvas" class="w-full h-full object-cover rounded-2xl"></canvas>
                 
                 <!-- Overlay de status e playback -->
-                <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-black/60 backdrop-blur-sm p-3 rounded-xl border border-white/10 text-white text-xs pointer-events-auto">
+                <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center bg-black/70 backdrop-blur-md p-3 rounded-xl border border-white/10 text-white text-xs pointer-events-auto">
                     <div class="flex items-center gap-2">
                         <button id="btnPlayPause" onclick="togglePlayback()" class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center hover:scale-105 transition">
                             <i data-lucide="play" id="playIcon" class="w-4 h-4 fill-white"></i>
                         </button>
-                        <span id="audioStatusText" class="text-[11px] text-zinc-300 truncate max-w-[120px]">Sem trilha sonora</span>
+                        <span id="audioStatusText" class="text-[11px] text-zinc-300 truncate max-w-[120px]">Mixer Ativo</span>
                     </div>
-                    <span id="videoDurationText" class="text-zinc-400 font-mono text-[10px]">00:00 / 01:00</span>
+                    <span id="videoDurationText" class="text-zinc-400 font-mono text-[10px]">00:00 / 00:15</span>
                 </div>
             </div>
         </div>
 
         <!-- Painel de Controle Lateral (Tabs) -->
-        <aside class="w-full md:w-[400px] bg-zinc-900 border-t md:border-t-0 md:border-l border-zinc-800 flex flex-col h-[45vh] md:h-full shrink-0">
+        <aside class="w-full md:w-[420px] bg-zinc-900 border-t md:border-t-0 md:border-l border-zinc-800 flex flex-col h-[50vh] md:h-full shrink-0">
             <!-- Navegação de Abas -->
             <div class="flex border-b border-zinc-800 text-zinc-400 overflow-x-auto select-none shrink-0">
-                <button onclick="switchTab('media')" id="tabBtn-media" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-purple-500 text-purple-400">
+                <button onclick="switchTab('media')" id="tabBtn-media" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-purple-500 text-purple-400 min-w-[70px]">
                     <i data-lucide="image" class="w-4 h-4"></i> Mídia
                 </button>
-                <button onclick="switchTab('text')" id="tabBtn-text" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent">
-                    <i data-lucide="component" class="w-4 h-4"></i> Elementos
+                <button onclick="switchTab('text')" id="tabBtn-text" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent min-w-[70px]">
+                    <i data-lucide="type" class="w-4 h-4"></i> Texto/Geral
                 </button>
-                <button onclick="switchTab('effects')" id="tabBtn-effects" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent">
+                <button onclick="switchTab('effects')" id="tabBtn-effects" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent min-w-[70px]">
                     <i data-lucide="wand-2" class="w-4 h-4"></i> Filtros
                 </button>
-                <button onclick="switchTab('audio')" id="tabBtn-audio" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent">
+                <button onclick="switchTab('audio')" id="tabBtn-audio" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent min-w-[70px]">
                     <i data-lucide="music" class="w-4 h-4"></i> Áudio
                 </button>
-                <button onclick="switchTab('projects')" id="tabBtn-projects" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent">
+                <button onclick="switchTab('projects')" id="tabBtn-projects" class="flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent min-w-[70px]">
                     <i data-lucide="folder-git-2" class="w-4 h-4"></i> Projetos
                 </button>
             </div>
@@ -170,30 +169,18 @@
                 
                 <!-- ABA MÍDIA -->
                 <div id="tabContent-media" class="space-y-4">
-                    <!-- Templates Rápidos 1-Clique -->
-                    <div>
-                        <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">💡 Templates 1-Clique</h3>
+                    <!-- Presets Rápidos -->
+                    <div class="space-y-2">
+                        <h3 class="text-xs font-bold text-purple-400 uppercase tracking-wider">⚡ Presets Temáticos Rápidos</h3>
                         <div class="grid grid-cols-2 gap-2">
-                            <button onclick="applyPresetTemplate('retro-vhs')" class="bg-gradient-to-tr from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-purple-500 p-2.5 rounded-xl text-left transition">
-                                <span class="block text-xs font-bold text-zinc-100">📹 Retro VHS</span>
-                                <span class="text-[9px] text-zinc-500">Glitch analógico e filtro estético</span>
-                            </button>
-                            <button onclick="applyPresetTemplate('cyber-neon')" class="bg-gradient-to-tr from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-purple-500 p-2.5 rounded-xl text-left transition">
-                                <span class="block text-xs font-bold text-zinc-100">🌌 Cyber Neon</span>
-                                <span class="text-[9px] text-zinc-500">Laser 3D, neon e atmosfera retro</span>
-                            </button>
-                            <button onclick="applyPresetTemplate('boho-summer')" class="bg-gradient-to-tr from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-purple-500 p-2.5 rounded-xl text-left transition">
-                                <span class="block text-xs font-bold text-zinc-100">☀️ Boho Summer</span>
-                                <span class="text-[9px] text-zinc-500">Mínimo terroso, elegância e luz</span>
-                            </button>
-                            <button onclick="applyPresetTemplate('winter-snow')" class="bg-gradient-to-tr from-zinc-950 to-zinc-900 border border-zinc-800 hover:border-purple-500 p-2.5 rounded-xl text-left transition">
-                                <span class="block text-xs font-bold text-zinc-100">❄️ Winter Magic</span>
-                                <span class="text-[9px] text-zinc-500">Nevasca suave e gradiente gelo</span>
-                            </button>
+                            <button onclick="applyPreset('retro')" class="py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs border border-zinc-700 text-left">📺 Retro VHS</button>
+                            <button onclick="applyPreset('cyberpunk')" class="py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs border border-zinc-700 text-left">🧪 Cyber Neon</button>
+                            <button onclick="applyPreset('summer')" class="py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs border border-zinc-700 text-left">☀️ Brisa de Verão</button>
+                            <button onclick="applyPreset('snow')" class="py-2 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs border border-zinc-700 text-left">❄️ Natal Nevado</button>
                         </div>
                     </div>
 
-                    <h3 class="text-sm font-bold text-zinc-300 pt-2">Plano de Fundo</h3>
+                    <h3 class="text-xs font-bold text-purple-400 uppercase tracking-wider pt-2">🖼️ Upload de Imagem ou Vídeo</h3>
                     <div class="grid grid-cols-2 gap-3">
                         <label class="cursor-pointer border-2 border-dashed border-zinc-700 hover:border-purple-500 rounded-xl p-4 flex flex-col items-center justify-center gap-2 transition bg-zinc-950/50">
                             <input type="file" accept="image/*" class="hidden" onchange="handleMediaUpload(this, 'image')">
@@ -208,7 +195,7 @@
                     </div>
 
                     <div class="space-y-2">
-                        <label class="text-xs text-zinc-400 font-semibold block">Posição e Escala da Imagem/Vídeo</label>
+                        <label class="text-xs text-zinc-400 font-semibold block">Ajustes de Fundo</label>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <span class="text-[10px] text-zinc-500">Escala (Zoom)</span>
@@ -221,9 +208,26 @@
                         </div>
                     </div>
 
-                    <!-- Galeria de Imagens de Demonstração Rápidas -->
+                    <!-- Controle de Duração do Story -->
+                    <div class="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-zinc-300">⏱️ Duração do Story</h4>
+                            <span id="storyDurationVal" class="text-xs font-mono text-purple-400 font-bold">15s</span>
+                        </div>
+                        <input id="storyDurationSlider" type="range" min="5" max="60" step="5" value="15" oninput="updateStoryDuration(this.value)" class="w-full accent-purple-500 bg-zinc-800 rounded-lg">
+                        
+                        <!-- Auto-sincronização inteligente -->
+                        <div class="flex items-center justify-between pt-2 border-t border-zinc-800">
+                            <span class="text-[11px] text-zinc-400">Sincronizar tempo automaticamente com o áudio</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="autoSyncDuration" onchange="toggleAutoSync(this.checked)" class="sr-only peer">
+                                <div class="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600 peer-checked:after:bg-white"></div>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="space-y-2">
-                        <span class="text-xs text-zinc-400 font-semibold block">Ou use uma cor sólida</span>
+                        <span class="text-xs text-zinc-400 font-semibold block">Ou use uma cor sólida / gradiente</span>
                         <div class="flex gap-2 flex-wrap">
                             <button onclick="setSolidBackground('#18181b')" class="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-900"></button>
                             <button onclick="setSolidBackground('#a855f7')" class="w-8 h-8 rounded-full border border-zinc-700 bg-purple-500"></button>
@@ -233,93 +237,29 @@
                             <button onclick="setSolidBackground('gradient')" class="w-8 h-8 rounded-full border border-zinc-700 bg-gradient-to-tr from-purple-600 to-pink-500" title="Gradiente Neon"></button>
                         </div>
                     </div>
-
-                    <!-- DURAÇÃO AJUSTÁVEL DO STORY (ATÉ 60 SEGUNDOS) -->
-                    <div class="space-y-2 pt-3 border-t border-zinc-800/80">
-                        <label class="text-xs text-zinc-400 font-semibold block">⏱️ Duração do Story (Vídeo)</label>
-                        <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-850 flex items-center justify-between gap-3">
-                            <input type="range" id="storyDurationSlider" min="5" max="60" step="5" value="60" oninput="updateStoryDuration(this.value)" class="flex-1 accent-purple-500 bg-zinc-800 rounded-lg">
-                            <span id="storyDurationVal" class="text-xs font-mono font-bold text-purple-400 min-w-[35px] text-right">60s</span>
-                        </div>
-                        <p class="text-[9px] text-zinc-500">Ajuste de 5 a 60 segundos. Ideal para WhatsApp (até 30s) ou TikTok/Reels/Vídeos de 1 minuto (até 60s).</p>
-                    </div>
                 </div>
 
-                <!-- ABA ELEMENTOS (TEXTO E STICKERS) -->
+                <!-- ABA TEXTO & ELEMENTOS -->
                 <div id="tabContent-text" class="hidden space-y-4">
                     <div class="flex gap-2">
-                        <button onclick="switchElementSubTab('texts')" id="btnSub-texts" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-purple-600 text-white">
-                            📝 Textos
+                        <button onclick="addNewText()" class="flex-1 text-xs bg-purple-600 hover:bg-purple-500 py-2.5 rounded-lg font-bold flex items-center justify-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Novo Texto
                         </button>
-                        <button onclick="switchElementSubTab('stickers')" id="btnSub-stickers" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-zinc-800 text-zinc-400 hover:text-zinc-200">
-                            🧸 Stickers & Formas
+                        <button onclick="openStickersPanel()" class="flex-1 text-xs bg-zinc-800 hover:bg-zinc-700 py-2.5 rounded-lg font-bold flex items-center justify-center gap-1 border border-zinc-700">
+                            <i data-lucide="smile" class="w-3.5 h-3.5 text-pink-400"></i> Stickers / Emojis
                         </button>
                     </div>
 
-                    <!-- SUB-ABA TEXTOS -->
-                    <div id="subContent-texts" class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Gerenciar Textos</h3>
-                            <button onclick="addNewText()" class="text-xs bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition">
-                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Novo Texto
-                            </button>
-                        </div>
-                        <div class="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
-                            <p class="text-[10px] text-purple-400 font-semibold flex items-center gap-1">
-                                <i data-lucide="info" class="w-3.5 h-3.5"></i> Dica: Arraste e redimensione os textos diretamente na tela!
-                            </p>
-                        </div>
-                        <!-- Lista de Textos Ativos -->
-                        <div id="activeTextsList" class="space-y-3"></div>
+                    <!-- Auxílio de Gestos no Canvas -->
+                    <div class="p-2.5 bg-zinc-950/60 border border-zinc-800/80 rounded-xl text-center">
+                        <p class="text-[11px] text-purple-300 flex items-center justify-center gap-1">
+                            <i data-lucide="pointer" class="w-3.5 h-3.5"></i> Dica: Arraste e redimensione os textos diretamente no Story!
+                        </p>
                     </div>
 
-                    <!-- SUB-ABA STICKERS -->
-                    <div id="subContent-stickers" class="hidden space-y-4">
-                        <!-- Biblioteca de Emojis -->
-                        <div>
-                            <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">🤩 Emojis Rápidos</h4>
-                            <div class="grid grid-cols-6 gap-2 bg-zinc-950 p-3 rounded-xl border border-zinc-850">
-                                <button onclick="addNewSticker('emoji', '🔥')" class="text-2xl hover:scale-125 transition-all">🔥</button>
-                                <button onclick="addNewSticker('emoji', '✨')" class="text-2xl hover:scale-125 transition-all">✨</button>
-                                <button onclick="addNewSticker('emoji', '❤️')" class="text-2xl hover:scale-125 transition-all">❤️</button>
-                                <button onclick="addNewSticker('emoji', '😂')" class="text-2xl hover:scale-125 transition-all">😂</button>
-                                <button onclick="addNewSticker('emoji', '👑')" class="text-2xl hover:scale-125 transition-all">👑</button>
-                                <button onclick="addNewSticker('emoji', '🚀')" class="text-2xl hover:scale-125 transition-all">🚀</button>
-                                <button onclick="addNewSticker('emoji', '📸')" class="text-2xl hover:scale-125 transition-all">📸</button>
-                                <button onclick="addNewSticker('emoji', '🎵')" class="text-2xl hover:scale-125 transition-all">🎵</button>
-                                <button onclick="addNewSticker('emoji', '🎯')" class="text-2xl hover:scale-125 transition-all">🎯</button>
-                                <button onclick="addNewSticker('emoji', '💥')" class="text-2xl hover:scale-125 transition-all">💥</button>
-                                <button onclick="addNewSticker('emoji', '💡')" class="text-2xl hover:scale-125 transition-all">💡</button>
-                                <button onclick="addNewSticker('emoji', '📍')" class="text-2xl hover:scale-125 transition-all">📍</button>
-                            </div>
-                        </div>
-
-                        <!-- Biblioteca de Formas Vetoriais -->
-                        <div>
-                            <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">📐 Formas e Molduras</h4>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button onclick="addNewSticker('shape', 'heart')" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 p-3 rounded-xl text-xs font-semibold text-zinc-300 flex items-center justify-center gap-2 transition">
-                                    <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500"></i> Coração
-                                </button>
-                                <button onclick="addNewSticker('shape', 'star')" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 p-3 rounded-xl text-xs font-semibold text-zinc-300 flex items-center justify-center gap-2 transition">
-                                    <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i> Estrela
-                                </button>
-                                <button onclick="addNewSticker('shape', 'circle-highlight')" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 p-3 rounded-xl text-xs font-semibold text-zinc-300 flex items-center justify-center gap-2 transition">
-                                    <i data-lucide="circle-dot" class="w-4 h-4 text-blue-400"></i> Foco Circular
-                                </button>
-                                <button onclick="addNewSticker('shape', 'badge-retro')" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-850 p-3 rounded-xl text-xs font-semibold text-zinc-300 flex items-center justify-center gap-2 transition">
-                                    <i data-lucide="award" class="w-4 h-4 text-emerald-400"></i> Selo Retro
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Lista de Elementos Gráficos Ativos -->
-                        <div>
-                            <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2">Listagem de Stickers</h4>
-                            <div id="activeStickersList" class="space-y-2">
-                                <!-- Preenchido via JS -->
-                            </div>
-                        </div>
+                    <!-- Lista de Textos e Elementos Ativos -->
+                    <div id="activeTextsList" class="space-y-3">
+                        <!-- Gerado dinamicamente -->
                     </div>
                 </div>
 
@@ -327,91 +267,46 @@
                 <div id="tabContent-effects" class="hidden space-y-4">
                     <h3 class="text-sm font-bold text-zinc-300">Filtros de Cor</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="setFilter('none')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            Normal
-                        </button>
-                        <button onclick="setFilter('vintage')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            📜 Vintage 70s
-                        </button>
-                        <button onclick="setFilter('cyberpunk')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            🧪 Neon Cyber
-                        </button>
-                        <button onclick="setFilter('blackwhite')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            🖤 P&B Dramático
-                        </button>
-                        <button onclick="setFilter('warmth')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            ☀️ Verão Quente
-                        </button>
-                        <button onclick="setFilter('cool')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            ❄️ Azul Frio
-                        </button>
+                        <button onclick="setFilter('none')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">Normal</button>
+                        <button onclick="setFilter('vintage')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">📜 Vintage 70s</button>
+                        <button onclick="setFilter('cyberpunk')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">🧪 Neon Cyber</button>
+                        <button onclick="setFilter('blackwhite')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">🖤 P&B Dramático</button>
+                        <button onclick="setFilter('warmth')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">☀️ Verão Quente</button>
+                        <button onclick="setFilter('cool')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">❄️ Azul Frio</button>
                     </div>
 
-                    <h3 class="text-sm font-bold text-zinc-300 pt-2">Efeitos Dinâmicos (Filtros de Vídeo)</h3>
+                    <h3 class="text-sm font-bold text-zinc-300 pt-2">Efeitos Animados de Vídeo</h3>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="setActiveAnimationEffect('none')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            Nenhum
-                        </button>
-                        <button onclick="setActiveAnimationEffect('vhs-glitch')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            📺 Ruído VHS
-                        </button>
-                        <button onclick="setActiveAnimationEffect('neon-glow')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            ⭐ Luz Estelar
-                        </button>
-                        <button onclick="setActiveAnimationEffect('falling-snow')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            ❄️ Neve Caindo
-                        </button>
-                        <button onclick="setActiveAnimationEffect('matrix')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            🟢 Chuva Matrix
-                        </button>
-                        <button onclick="setActiveAnimationEffect('fireflies')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            ✨ Pirilampos (Vagalumes)
-                        </button>
-                        <button onclick="setActiveAnimationEffect('rain-drops')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            🌧️ Chuva Realista
-                        </button>
-                        <button onclick="setActiveAnimationEffect('light-leaks')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            🌅 Vazamento de Luz (Leaks)
-                        </button>
-                        <button onclick="setActiveAnimationEffect('cyber-grid')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">
-                            👾 Laser Cyber Grid
-                        </button>
+                        <button onclick="setActiveAnimationEffect('none')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">Nenhum</button>
+                        <button onclick="setActiveAnimationEffect('vhs-glitch')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">📺 Ruído VHS</button>
+                        <button onclick="setActiveAnimationEffect('neon-glow')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">⭐ Luz Estelar</button>
+                        <button onclick="setActiveAnimationEffect('falling-snow')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">❄️ Neve Caindo</button>
+                        <button onclick="setActiveAnimationEffect('matrix')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">🟢 Chuva Matrix</button>
+                        <button onclick="setActiveAnimationEffect('fireflies')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">✨ Pirilampos</button>
+                        <button onclick="setActiveAnimationEffect('rain')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">🌧️ Chuva Realista</button>
+                        <button onclick="setActiveAnimationEffect('lightleaks')" class="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-left border border-zinc-700 focus:border-purple-500">🎞️ Light Leaks</button>
                     </div>
                 </div>
 
-                <!-- ABA ÁUDIO -->
+                <!-- ABA ESTÚDIO DE ÁUDIO -->
                 <div id="tabContent-audio" class="hidden space-y-4">
-                    <!-- Locutor / Gravador de Voz -->
-                    <div class="bg-zinc-950 p-4 rounded-2xl border border-zinc-800 space-y-3">
-                        <h4 class="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> Gravar Minha Voz (Voiceover)
-                        </h4>
-                        <p class="text-[10px] text-zinc-500 leading-normal">
-                            Grave áudio pelo microfone para criar locuções, adicionando-as como camadas sonoras individuais na sua timeline.
-                        </p>
-                        
-                        <div class="flex items-center gap-3">
-                            <button id="btnVoiceRecord" onclick="toggleVoiceRecording()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200">
-                                <i data-lucide="mic" class="w-4 h-4"></i> <span id="txtVoiceRecord">Começar Gravação</span>
-                            </button>
-                        </div>
+                    <h3 class="text-xs font-bold text-purple-400 uppercase tracking-wider">🎛️ Multicanais & Edição de Som</h3>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer border border-zinc-800 hover:border-purple-500 rounded-xl p-3 flex flex-col items-center justify-center gap-1.5 transition bg-zinc-950/40 text-center">
+                            <input type="file" accept="audio/*" class="hidden" onchange="addAudioTrack(this)">
+                            <i data-lucide="music-4" class="w-5 h-5 text-purple-400"></i>
+                            <span class="text-[10px] text-zinc-300 font-semibold">Subir Áudio/MP3</span>
+                        </label>
+                        <button onclick="toggleVoiceoverRecording()" id="voiceoverBtn" class="border border-zinc-800 hover:border-red-500 rounded-xl p-3 flex flex-col items-center justify-center gap-1.5 transition bg-zinc-950/40 text-center">
+                            <i data-lucide="mic" id="micIcon" class="w-5 h-5 text-red-500"></i>
+                            <span id="voiceoverBtnText" class="text-[10px] text-zinc-300 font-semibold">Gravar Voz</span>
+                        </button>
                     </div>
 
-                    <h3 class="text-sm font-bold text-zinc-300 pt-2">Adicionar Faixa de Áudio (MP3 / Música)</h3>
-                    <label class="cursor-pointer border-2 border-dashed border-zinc-700 hover:border-purple-500 rounded-xl p-6 flex flex-col items-center justify-center gap-2 transition bg-zinc-950/50">
-                        <input type="file" accept="audio/mp3, audio/*" class="hidden" onchange="handleAudioUpload(this)">
-                        <i data-lucide="music-4" class="w-8 h-8 text-purple-400"></i>
-                        <span class="text-xs text-zinc-300 font-semibold text-center">Selecionar MP3 de Fundo</span>
-                        <p class="text-[10px] text-zinc-500 text-center">Você pode carregar várias faixas simultaneamente!</p>
-                    </label>
-
-                    <!-- Lista de Mixagem de Áudio Multicanal -->
-                    <div class="space-y-2">
-                        <h4 class="text-xs font-bold text-zinc-400 uppercase tracking-wider">🎚️ Console de Mixagem</h4>
-                        <div id="audioTracksList" class="space-y-2.5">
-                            <!-- Gerado via JS dinamicamente -->
-                            <p class="text-xs text-zinc-500 text-center py-2">Nenhum áudio carregado no projeto.</p>
-                        </div>
+                    <!-- Lista de Faixas Mixadas Atuais -->
+                    <div id="audioMixerContainer" class="space-y-4">
+                        <!-- Gerado dinamicamente -->
                     </div>
                 </div>
 
@@ -433,6 +328,48 @@
             </div>
         </aside>
     </main>
+
+    <!-- Modal Seletor de Stickers/Emojis -->
+    <div id="stickersModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-5 relative">
+            <button onclick="closeStickersPanel()" class="absolute top-4 right-4 text-zinc-400 hover:text-zinc-200">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h3 class="text-sm font-bold text-zinc-100 flex items-center gap-2 mb-4">
+                <i data-lucide="smile" class="text-purple-400"></i> Biblioteca de Elementos
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <span class="text-[10px] text-zinc-500 font-bold block mb-2 uppercase">Figurinhas & Emojis</span>
+                    <div class="grid grid-cols-6 gap-2 text-2xl h-[100px] overflow-y-auto bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">
+                        <button onclick="addStickerElement('🔥')" class="hover:scale-125 transition">🔥</button>
+                        <button onclick="addStickerElement('✨')" class="hover:scale-125 transition">✨</button>
+                        <button onclick="addStickerElement('👑')" class="hover:scale-125 transition">👑</button>
+                        <button onclick="addStickerElement('💖')" class="hover:scale-125 transition">💖</button>
+                        <button onclick="addStickerElement('😎')" class="hover:scale-125 transition">😎</button>
+                        <button onclick="addStickerElement('🎵')" class="hover:scale-125 transition">🎵</button>
+                        <button onclick="addStickerElement('🚀')" class="hover:scale-125 transition">🚀</button>
+                        <button onclick="addStickerElement('🎯')" class="hover:scale-125 transition">🎯</button>
+                        <button onclick="addStickerElement('💯')" class="hover:scale-125 transition">💯</button>
+                        <button onclick="addStickerElement('👽')" class="hover:scale-125 transition">👽</button>
+                        <button onclick="addStickerElement('💡')" class="hover:scale-125 transition">💡</button>
+                        <button onclick="addStickerElement('💫')" class="hover:scale-125 transition">💫</button>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="text-[10px] text-zinc-500 font-bold block mb-2 uppercase">Formas Decorativas</span>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="addFormElement('circle')" class="py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-purple-500 text-xs text-zinc-300 font-bold">● Círculo</button>
+                        <button onclick="addFormElement('square')" class="py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-purple-500 text-xs text-zinc-300 font-bold">■ Quadrado</button>
+                        <button onclick="addFormElement('badge')" class="py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-purple-500 text-xs text-zinc-300 font-bold">🎖️ Crachá</button>
+                        <button onclick="addFormElement('line')" class="py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl hover:border-purple-500 text-xs text-zinc-300 font-bold">▬ Linha</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal do Simulador de Preview do Celular (Interativo) -->
     <div id="phonePreviewModal" class="hidden fixed inset-0 bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 z-50">
@@ -568,57 +505,50 @@
         previewPhoneCanvas.height = defaultHeight;
 
         let activeTab = 'media';
-        let elementSubTab = 'texts';
-        let mediaFile = null; // { type: 'image'|'video', src: HTMLImageElement|HTMLVideoElement, scale: 1, yOffset: 0 }
-        
+        let mediaFile = null; // { type: 'image'|'video', src, scale, yOffset }
         let textLayers = [];
-        let stickerLayers = []; // Stickers e Formas Decorativas adicionais
-        
-        let selectedTextId = null; // ID do texto em edição ativa para guias do canvas
-        let selectedStickerId = null; // ID do sticker ativo para arraste/guia
-
+        let selectedTextId = null; 
         let selectedFilter = 'none';
         let activeAnimationEffect = 'none';
         
-        // MIXADOR DE ÁUDIO MULTICANAL
-        let audioTracks = []; // Array contendo: { id, name, src: HTMLAudioElement, originalData (Base64), volume (0 a 1) }
-        
+        let audioTracks = []; // Array de { id, file, src, name, volume, startTime, endTime, duration, originalData }
         let isPlaying = false;
         let lastFrameTime = 0;
-        let animationDuration = 60; // NOVO PADRÃO: 60 segundos (1 minuto) de timeline
+        let animationDuration = 15; // story padrão inicial de 15 segundos
         let currentTime = 0; // segundos decorridos para render e timeline
         let isPhonePreviewActive = false;
+        let autoSyncEnabled = false;
 
-        // Locutor de Voz Integrado
-        let mediaRecorder;
-        let audioChunks = [];
+        // Controle de Voz / Locução
+        let mediaRecorderVoice = null;
+        let voiceChunks = [];
         let isRecordingVoice = false;
 
-        // Interação por Arraste e Redimensionamento Direto no Canvas
-        let isDragging = false;
+        // Controle de arrastar e redimensionar no Canvas
+        let dragTarget = null; // Elemento sendo arrastado ou redimensionado
         let isResizing = false;
-        let dragTarget = null; // { type: 'text'|'sticker', id: ... }
-        let dragStartOffset = { x: 0, y: 0 };
-        let resizeStartSize = 0;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
         let resizeStartWidth = 0;
-        let resizeStartDistance = 0;
-        
-        // Configuração Ampliada de Fontes Google Fonts de Alto Impacto
+        let resizeStartHeight = 0;
+        let touchStartDist = 0;
+
+        // Configurações de Fontes do StoryCraft Pro
         const fontsAvailable = [
             { name: 'Plus Jakarta Sans', fontClass: 'sans-serif' },
             { name: 'Bangers', fontClass: 'bangers' },
             { name: 'Cinzel', fontClass: 'serif' },
             { name: 'Creepster', fontClass: 'creepster' },
             { name: 'Press Start 2P', fontClass: 'monospace' },
-            { name: 'Shrikhand', fontClass: 'display-shrikhand' },
-            { name: 'Pacifico', fontClass: 'script-pacifico' },
-            { name: 'Anton', fontClass: 'impact-anton' },
-            { name: 'Special Elite', fontClass: 'vintage-elite' },
-            { name: 'Dancing Script', fontClass: 'elegant-dancing' },
-            { name: 'Rubik Mono One', fontClass: 'blocky-rubik' }
+            { name: 'Shrikhand', fontClass: 'shrikhand' },
+            { name: 'Pacifico', fontClass: 'pacifico' },
+            { name: 'Anton', fontClass: 'anton' },
+            { name: 'Special Elite', fontClass: 'special-elite' },
+            { name: 'Dancing Script', fontClass: 'dancing-script' },
+            { name: 'Rubik Mono One', fontClass: 'rubik' }
         ];
 
-        // Partículas para Efeitos
+        // Partículas de efeitos e ambientes
         let particles = [];
 
         // --- SISTEMA DE BANCO DE DADOS (INDEXEDDB) ---
@@ -626,15 +556,6 @@
         const DB_VERSION = 1;
         const STORE_NAME = 'projects';
         let db;
-
-        // Inicializa com segurança os ícones Lucide no documento
-        function initLucide() {
-            if (typeof lucide !== 'undefined') {
-                lucide.createIcons();
-            } else {
-                console.warn("Aguardando carregamento da biblioteca Lucide...");
-            }
-        }
 
         function initDatabase() {
             const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -656,10 +577,16 @@
             initDatabase();
             initLucide();
             resetWorkspace();
-            initCanvasEvents();
             registerStoryPWA();
+            setupCanvasInteractions();
             requestAnimationFrame(renderLoop);
         };
+
+        function initLucide() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
 
         function resetWorkspace() {
             mediaFile = {
@@ -671,7 +598,8 @@
             textLayers = [
                 {
                     id: 'default-title',
-                    text: 'ARRASTE ESTA CAIXA',
+                    type: 'text',
+                    text: 'TOQUE E ARRASTE NO TELA',
                     x: defaultWidth / 2,
                     y: defaultHeight / 3,
                     fontSize: 60,
@@ -681,12 +609,13 @@
                     fontFamily: 'Bangers',
                     shadow: true,
                     shadowColor: '#a855f7',
-                    animation: 'float',
-                    bold: false
+                    bold: true,
+                    animation: 'float'
                 },
                 {
                     id: 'default-subtitle',
-                    text: 'Ajuste a duração até 60s, a quebra de linha ou adicione stickers!',
+                    type: 'text',
+                    text: 'Mixagem de Som, Edição de Faixas e Preview em Tempo Real!',
                     x: defaultWidth / 2,
                     y: defaultHeight / 2 + 50,
                     fontSize: 40,
@@ -696,570 +625,228 @@
                     fontFamily: 'Plus Jakarta Sans',
                     shadow: false,
                     shadowColor: '#000000',
-                    animation: 'pulse',
-                    bold: true
+                    bold: false,
+                    animation: 'pulse'
                 }
             ];
-            stickerLayers = [
-                {
-                    id: 'sticker-star-example',
-                    type: 'shape',
-                    value: 'star',
-                    x: defaultWidth / 2,
-                    y: defaultHeight / 1.5,
-                    size: 150,
-                    color: '#eab308'
-                }
-            ];
-            
-            // Pausar e limpar trilhas anteriores se houverem
-            audioTracks.forEach(t => { if (t.src) t.src.pause(); });
-            audioTracks = [];
-            
             selectedTextId = 'default-title';
-            selectedStickerId = null;
             selectedFilter = 'none';
             activeAnimationEffect = 'none';
+            audioTracks = [];
             isPlaying = false;
             currentTime = 0;
-            animationDuration = 60; // Reinicia para 60 segundos padrão
-
-            const durationSlider = document.getElementById('storyDurationSlider');
-            if (durationSlider) {
-                durationSlider.value = 60;
-                document.getElementById('storyDurationVal').innerText = '60s';
-            }
-
+            autoSyncEnabled = false;
+            animationDuration = 15;
+            document.getElementById('storyDurationSlider').value = 15;
+            document.getElementById('storyDurationVal').innerText = "15s";
+            document.getElementById('autoSyncDuration').checked = false;
+            updateAudioTracksUI();
             updateAudioPlaybackUI();
             updateTextListUI();
-            updateStickerListUI();
-            updateAudioTracksUI();
-        }
-
-        // --- ATUALIZAÇÃO DURAÇÃO DO STORY ---
-        function updateStoryDuration(val) {
-            animationDuration = parseInt(val);
-            document.getElementById('storyDurationVal').innerText = val + 's';
-            if (currentTime > animationDuration) {
-                currentTime = 0;
-            }
-        }
-
-        // --- INTERAÇÕES DIRETAS (ARRASTAR & REDIMENSIONAR NO CANVAS) ---
-        function initCanvasEvents() {
-            const getCanvasCoords = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: (clientX - rect.left) * (defaultWidth / rect.width),
-                    y: (clientY - rect.top) * (defaultHeight / rect.height)
-                };
-            };
-
-            const handleStart = (e) => {
-                const coords = getCanvasCoords(e);
-                const clickX = coords.x;
-                const clickY = coords.y;
-
-                // 1. Verificar primeiro se clicou no botão de redimensionamento do elemento ativo
-                if (dragTarget) {
-                    let handleX, handleY;
-                    if (dragTarget.type === 'text') {
-                        const layer = textLayers.find(t => t.id === dragTarget.id);
-                        if (layer) {
-                            const fontStr = `${layer.bold ? 'bold ' : ''}${layer.fontSize}px "${layer.fontFamily}", sans-serif`;
-                            const lines = getWrappedLines(ctx, layer.text, layer.width || 800, fontStr);
-                            const totalHeight = lines.length * (layer.fontSize * 1.25);
-                            handleX = layer.x + (layer.width || 800) / 2;
-                            handleY = layer.y + totalHeight / 2;
-                        }
-                    } else if (dragTarget.type === 'sticker') {
-                        const sticker = stickerLayers.find(s => s.id === dragTarget.id);
-                        if (sticker) {
-                            handleX = sticker.x + sticker.size / 2;
-                            handleY = sticker.y + sticker.size / 2;
-                        }
-                    }
-
-                    if (handleX && handleY) {
-                        const dist = Math.hypot(clickX - handleX, clickY - handleY);
-                        if (dist < 55) { // Sensibilidade do botão de redimensionar
-                            isResizing = true;
-                            resizeStartDistance = Math.hypot(clickX - (dragTarget.type === 'text' ? textLayers.find(t=>t.id===dragTarget.id).x : stickerLayers.find(s=>s.id===dragTarget.id).x), clickY - (dragTarget.type === 'text' ? textLayers.find(t=>t.id===dragTarget.id).y : stickerLayers.find(s=>s.id===dragTarget.id).y));
-                            if (dragTarget.type === 'text') {
-                                resizeStartWidth = textLayers.find(t=>t.id===dragTarget.id).width || 800;
-                                resizeStartSize = textLayers.find(t=>t.id===dragTarget.id).fontSize;
-                            } else {
-                                resizeStartSize = stickerLayers.find(s=>s.id===dragTarget.id).size;
-                            }
-                            e.preventDefault();
-                            return;
-                        }
-                    }
-                }
-
-                // 2. Procurar clique dentro das caixas dos textos
-                for (let i = textLayers.length - 1; i >= 0; i--) {
-                    const layer = textLayers[i];
-                    const fontStr = `${layer.bold ? 'bold ' : ''}${layer.fontSize}px "${layer.fontFamily}", sans-serif`;
-                    const lines = getWrappedLines(ctx, layer.text, layer.width || 800, fontStr);
-                    const totalHeight = lines.length * (layer.fontSize * 1.25);
-                    const halfW = (layer.width || 800) / 2;
-                    const halfH = totalHeight / 2;
-
-                    if (clickX >= layer.x - halfW && clickX <= layer.x + halfW &&
-                        clickY >= layer.y - halfH && clickY <= layer.y + halfH) {
-                        
-                        dragTarget = { type: 'text', id: layer.id };
-                        selectedTextId = layer.id;
-                        selectedStickerId = null;
-                        isDragging = true;
-                        dragStartOffset = { x: clickX - layer.x, y: clickY - layer.y };
-                        updateTextListUI();
-                        updateTextListHighlight();
-                        e.preventDefault();
-                        return;
-                    }
-                }
-
-                // 3. Procurar clique dentro dos stickers/formas
-                for (let i = stickerLayers.length - 1; i >= 0; i--) {
-                    const sticker = stickerLayers[i];
-                    const halfSize = sticker.size / 2;
-
-                    if (clickX >= sticker.x - halfSize && clickX <= sticker.x + halfSize &&
-                        clickY >= sticker.y - halfSize && clickY <= sticker.y + halfSize) {
-                        
-                        dragTarget = { type: 'sticker', id: sticker.id };
-                        selectedStickerId = sticker.id;
-                        selectedTextId = null;
-                        isDragging = true;
-                        dragStartOffset = { x: clickX - sticker.x, y: clickY - sticker.y };
-                        updateStickerListUI();
-                        e.preventDefault();
-                        return;
-                    }
-                }
-
-                // Clicou fora: limpa seleções ativas
-                dragTarget = null;
-                selectedTextId = null;
-                selectedStickerId = null;
-                updateTextListHighlight();
-            };
-
-            const handleMove = (e) => {
-                if (!dragTarget) return;
-                const coords = getCanvasCoords(e);
-                const currentX = coords.x;
-                const currentY = coords.y;
-
-                if (isDragging) {
-                    if (dragTarget.type === 'text') {
-                        const layer = textLayers.find(t => t.id === dragTarget.id);
-                        if (layer) {
-                            layer.x = currentX - dragStartOffset.x;
-                            layer.y = currentY - dragStartOffset.y;
-                            updateTextListUI();
-                        }
-                    } else if (dragTarget.type === 'sticker') {
-                        const sticker = stickerLayers.find(s => s.id === dragTarget.id);
-                        if (sticker) {
-                            sticker.x = currentX - dragStartOffset.x;
-                            sticker.y = currentY - dragStartOffset.y;
-                            updateStickerListUI();
-                        }
-                    }
-                } else if (isResizing) {
-                    if (dragTarget.type === 'text') {
-                        const layer = textLayers.find(t => t.id === dragTarget.id);
-                        if (layer) {
-                            const currentDist = Math.hypot(currentX - layer.x, currentY - layer.y);
-                            const ratio = currentDist / resizeStartDistance;
-                            
-                            // Redimensiona proporcionalmente a largura e a fonte
-                            layer.width = Math.max(150, Math.min(1000, Math.round(resizeStartWidth * ratio)));
-                            layer.fontSize = Math.max(15, Math.min(120, Math.round(resizeStartSize * ratio)));
-                            updateTextListUI();
-                        }
-                    } else if (dragTarget.type === 'sticker') {
-                        const sticker = stickerLayers.find(s => s.id === dragTarget.id);
-                        if (sticker) {
-                            const currentDist = Math.hypot(currentX - sticker.x, currentY - sticker.y);
-                            const ratio = currentDist / resizeStartDistance;
-                            sticker.size = Math.max(40, Math.min(600, Math.round(resizeStartSize * ratio)));
-                            updateStickerListUI();
-                        }
-                    }
-                }
-            };
-
-            const handleEnd = () => {
-                isDragging = false;
-                isResizing = false;
-            };
-
-            canvas.addEventListener('mousedown', handleStart);
-            canvas.addEventListener('mousemove', handleMove);
-            window.addEventListener('mouseup', handleEnd);
-
-            canvas.addEventListener('touchstart', handleStart, { passive: false });
-            canvas.addEventListener('touchmove', handleMove, { passive: false });
-            window.addEventListener('touchend', handleEnd);
-        }
-
-        // --- SISTEMA DE PRESETS E TEMPLATES 1-CLIQUE ---
-        function applyPresetTemplate(templateId) {
-            resetWorkspace();
-            
-            if (templateId === 'retro-vhs') {
-                mediaFile = { type: 'color', color: '#09090b', scale: 1, yOffset: 0 };
-                textLayers = [
-                    {
-                        id: 'vhs-t1',
-                        text: 'MOMENTO RARO',
-                        x: defaultWidth / 2,
-                        y: defaultHeight / 2 - 100,
-                        fontSize: 80,
-                        width: 900,
-                        align: 'center',
-                        color: '#00ffff',
-                        fontFamily: 'Rubik Mono One',
-                        shadow: true,
-                        shadowColor: '#ff0055',
-                        animation: 'shake',
-                        bold: true
-                    },
-                    {
-                        id: 'vhs-t2',
-                        text: 'Estilo gravador analógico anos 90',
-                        x: defaultWidth / 2,
-                        y: defaultHeight / 2 + 100,
-                        fontSize: 35,
-                        width: 800,
-                        align: 'center',
-                        color: '#ffffff',
-                        fontFamily: 'Special Elite',
-                        shadow: false,
-                        shadowColor: '#000000',
-                        animation: 'none',
-                        bold: false
-                    }
-                ];
-                stickerLayers = [];
-                selectedFilter = 'vintage';
-                activeAnimationEffect = 'vhs-glitch';
-                showToast("Template Retro VHS Aplicado!");
-
-            } else if (templateId === 'cyber-neon') {
-                mediaFile = { type: 'gradient', scale: 1, yOffset: 0 };
-                textLayers = [
-                    {
-                        id: 'cyber-t1',
-                        text: 'NEON FUTURE',
-                        x: defaultWidth / 2,
-                        y: defaultHeight / 2.5,
-                        fontSize: 90,
-                        width: 900,
-                        align: 'center',
-                        color: '#ffffff',
-                        fontFamily: 'Shrikhand',
-                        shadow: true,
-                        shadowColor: '#ec4899',
-                        animation: 'float',
-                        bold: true
-                    }
-                ];
-                stickerLayers = [
-                    {
-                        id: 'cyber-shape1',
-                        type: 'shape',
-                        value: 'star',
-                        x: defaultWidth / 2,
-                        y: defaultHeight / 1.5,
-                        size: 180,
-                        color: '#a855f7'
-                    }
-                ];
-                selectedFilter = 'cyberpunk';
-                activeAnimationEffect = 'cyber-grid';
-                showToast("Template Cyber Neon Aplicado!");
-
-            } else if (templateId === 'boho-summer') {
-                mediaFile = { type: 'color', color: '#dfd5c6', scale: 1, yOffset: 0 }; // Bege Boho
-                textLayers = [
-                    {
-                        id: 'boho-t1',
-                        text: 'Calmaria e sol.',
-                        x: defaultWidth / 2,
-                        y: defaultHeight / 2.5,
-                        fontSize: 65,
-                        width: 800,
-                        align: 'center',
-                        color: '#5c4d3c',
-                        fontFamily: 'Dancing Script',
-                        shadow: false,
-                        shadowColor: '#000000',
-                        animation: 'float',
-                        bold: true
-                    },
-                    {
-                        id: 'boho-t2',
-                        text: 'UM DIA DE CADA VEZ',
-                        x: defaultWidth / 2,
-                        y: defaultHeight / 1.8,
-                        fontSize: 35,
-                        width: 750,
-                        align: 'center',
-                        color: '#7a6a58',
-                        fontFamily: 'Cinzel',
-                        shadow: false,
-                        shadowColor: '#000000',
-                        animation: 'none',
-                        bold: true
-                    }
-                ];
-                stickerLayers = [
-                    {
-                        id: 'boho-shape1',
-                        type: 'shape',
-                        value: 'heart',
-                        x: defaultWidth / 2,
-                        y: defaultHeight / 1.4,
-                        size: 120,
-                        color: '#b58a7b'
-                    }
-                ];
-                selectedFilter = 'warmth';
-                activeAnimationEffect = 'light-leaks';
-                showToast("Template Boho Summer Aplicado!");
-
-            } else if (templateId === 'winter-snow') {
-                mediaFile = { type: 'gradient', scale: 1, yOffset: 0 };
-                textLayers = [
-                    {
-                        id: 'winter-t1',
-                        text: 'Magia de Inverno',
-                        x: defaultWidth / 2,
-                        y: defaultHeight / 2,
-                        fontSize: 75,
-                        width: 850,
-                        align: 'center',
-                        color: '#ffffff',
-                        fontFamily: 'Pacifico',
-                        shadow: true,
-                        shadowColor: '#3b82f6',
-                        animation: 'pulse',
-                        bold: false
-                    }
-                ];
-                stickerLayers = [];
-                selectedFilter = 'cool';
-                activeAnimationEffect = 'falling-snow';
-                showToast("Template Winter Magic Aplicado!");
-            }
-
-            // Atualiza UI geral pós-reset e preset
-            selectedTextId = textLayers.length > 0 ? textLayers[0].id : null;
-            updateTextListUI();
-            updateStickerListUI();
-        }
-
-        // --- SISTEMA DE LOCUÇÃO DE VOZ (MICROFONE) ---
-        function toggleVoiceRecording() {
-            if (isRecordingVoice) {
-                stopVoiceRecording();
-            } else {
-                startVoiceRecording();
-            }
-        }
-
-        async function startVoiceRecording() {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showToast("Seu navegador não oferece suporte para gravação de voz.", true);
-                return;
-            }
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) audioChunks.push(e.data);
-                };
-
-                mediaRecorder.onstop = () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const audio = new Audio(e.target.result);
-                        audio.loop = true;
-                        
-                        const newTrack = {
-                            id: 'audio-voice-' + Date.now(),
-                            name: "Locução Gravada " + new Date().toLocaleTimeString(),
-                            src: audio,
-                            originalData: e.target.result,
-                            volume: 1.0 // Volume padrão total para voz
-                        };
-                        
-                        audioTracks.push(newTrack);
-                        updateAudioTracksUI();
-                        
-                        if (isPlaying) {
-                            audio.volume = newTrack.volume;
-                            audio.play().catch(()=>{});
-                        }
-                        showToast("Locução de voz adicionada!");
-                    };
-                    reader.readAsDataURL(audioBlob);
-
-                    // Fechar trilhas do microfone
-                    stream.getTracks().forEach(track => track.stop());
-                };
-
-                mediaRecorder.start();
-                isRecordingVoice = true;
-                
-                // Atualizar UI do Botão de Gravação
-                const btn = document.getElementById('btnVoiceRecord');
-                btn.className = "flex-1 bg-red-500 hover:bg-red-600 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200 animate-pulse";
-                document.getElementById('txtVoiceRecord').innerText = "Gravando voz... Toque para Parar";
-                showToast("Gravando voz... fale próximo ao microfone.");
-            } catch (err) {
-                console.error(err);
-                showToast("Permissão de microfone negada ou indisponível.", true);
-            }
-        }
-
-        function stopVoiceRecording() {
-            if (mediaRecorder && isRecordingVoice) {
-                mediaRecorder.stop();
-                isRecordingVoice = false;
-
-                // Restaurar UI do botão
-                const btn = document.getElementById('btnVoiceRecord');
-                btn.className = "flex-1 bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition duration-200";
-                document.getElementById('txtVoiceRecord').innerText = "Começar Gravação";
-            }
-        }
-
-        // --- SISTEMA DE SUB-ABAS ELEMENTOS ---
-        function switchElementSubTab(subTabId) {
-            document.getElementById(`subContent-${elementSubTab}`).classList.add('hidden');
-            document.getElementById(`btnSub-${elementSubTab}`).className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-zinc-800 text-zinc-400 hover:text-zinc-200";
-            
-            document.getElementById(`subContent-${subTabId}`).classList.remove('hidden');
-            document.getElementById(`btnSub-${subTabId}`).className = "flex-1 py-1.5 text-xs font-bold rounded-lg bg-purple-600 text-white";
-            
-            elementSubTab = subTabId;
-        }
-
-        // --- GERENCIAMENTO DE STICKERS ---
-        function addNewSticker(type, value) {
-            const newSticker = {
-                id: 'sticker-' + Date.now(),
-                type: type, // 'emoji' ou 'shape'
-                value: value, // ex: '🔥' ou 'star'
-                x: defaultWidth / 2,
-                y: defaultHeight / 2,
-                size: 150,
-                color: '#ffffff' // Cor da forma caso seja shape
-            };
-            stickerLayers.push(newSticker);
-            selectedStickerId = newSticker.id;
-            selectedTextId = null;
-            updateStickerListUI();
-            showToast("Sticker adicionado!");
-        }
-
-        function updateStickerListUI() {
-            const container = document.getElementById('activeStickersList');
-            container.innerHTML = '';
-
-            if (stickerLayers.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-2">Nenhum sticker ou forma ativa.</p>`;
-                return;
-            }
-
-            stickerLayers.forEach((sticker, index) => {
-                const isSelected = selectedStickerId === sticker.id;
-                const card = document.createElement('div');
-                card.className = `bg-zinc-950 p-2.5 rounded-xl border transition ${isSelected ? 'border-purple-500' : 'border-zinc-850'}`;
-                card.onclick = () => {
-                    selectedStickerId = sticker.id;
-                    selectedTextId = null;
-                    updateStickerListUI();
-                };
-                card.innerHTML = `
-                    <div class="flex items-center justify-between gap-2">
-                        <span class="text-[10px] font-bold text-zinc-400">STICKER #${index + 1} (${sticker.value})</span>
-                        <button onclick="removeSticker('${sticker.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-2 mt-2">
-                        <div>
-                            <span class="text-[9px] text-zinc-500 block">Tamanho (${sticker.size}px)</span>
-                            <input type="range" min="40" max="600" value="${sticker.size}" oninput="updateStickerProperty('${sticker.id}', 'size', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
-                        </div>
-                        ${sticker.type === 'shape' ? `
-                        <div>
-                            <span class="text-[9px] text-zinc-500 block">Cor da Forma</span>
-                            <input type="color" value="${sticker.color}" oninput="updateStickerProperty('${sticker.id}', 'color', this.value)" class="w-full h-6 bg-transparent border border-zinc-800 rounded cursor-pointer">
-                        </div>
-                        ` : `
-                        <div class="text-[9px] text-zinc-500 flex items-center justify-center">
-                            Apenas Emojis
-                        </div>
-                        `}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-            initLucide();
-        }
-
-        function updateStickerProperty(id, property, value) {
-            const index = stickerLayers.findIndex(s => s.id === id);
-            if (index !== -1) {
-                stickerLayers[index][property] = value;
-            }
-        }
-
-        function removeSticker(id) {
-            stickerLayers = stickerLayers.filter(s => s.id !== id);
-            if (selectedStickerId === id) {
-                selectedStickerId = stickerLayers.length > 0 ? stickerLayers[0].id : null;
-            }
-            updateStickerListUI();
-            showToast("Sticker removido.");
-        }
-
-        // --- PREVIEW DE SMARTPHONE ---
-        function openPhonePreview() {
-            isPhonePreviewActive = true;
-            document.getElementById('phonePreviewModal').classList.remove('hidden');
-            showToast("Modo de visualização móvel ativo!");
-        }
-
-        function closePhonePreview() {
-            isPhonePreviewActive = false;
-            document.getElementById('phonePreviewModal').classList.add('hidden');
         }
 
         // --- NAVEGAÇÃO DE ABAS ---
         function switchTab(tabId) {
             document.getElementById(`tabContent-${activeTab}`).classList.add('hidden');
-            document.getElementById(`tabBtn-${activeTab}`).className = "flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent text-zinc-400";
+            document.getElementById(`tabBtn-${activeTab}`).className = "flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-transparent text-zinc-400 min-w-[70px]";
             
             document.getElementById(`tabContent-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tabBtn-${tabId}`).className = "flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-purple-500 text-purple-400";
+            document.getElementById(`tabBtn-${tabId}`).className = "flex-1 py-3 text-xs font-semibold flex flex-col items-center gap-1 border-b-2 border-purple-500 text-purple-400 min-w-[70px]";
             
             activeTab = tabId;
+        }
+
+        // --- SISTEMA DE PRESETS EM 1-CLIQUE ---
+        function applyPreset(presetType) {
+            if (presetType === 'retro') {
+                mediaFile = { type: 'color', color: '#09090b', scale: 1, yOffset: 0 };
+                textLayers = [
+                    {
+                        id: 'text-' + Date.now(),
+                        type: 'text',
+                        text: 'PRODUÇÃO RETRÔ',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 3,
+                        fontSize: 80,
+                        width: 800,
+                        align: 'center',
+                        color: '#ffffff',
+                        fontFamily: 'Press Start 2P',
+                        shadow: true,
+                        shadowColor: '#ef4444',
+                        bold: true,
+                        animation: 'float'
+                    }
+                ];
+                selectedFilter = 'vintage';
+                activeAnimationEffect = 'vhs-glitch';
+            } else if (presetType === 'cyberpunk') {
+                mediaFile = { type: 'gradient', scale: 1, yOffset: 0 };
+                textLayers = [
+                    {
+                        id: 'text-' + Date.now(),
+                        type: 'text',
+                        text: 'NEON CYBER',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 3,
+                        fontSize: 90,
+                        width: 850,
+                        align: 'center',
+                        color: '#ffffff',
+                        fontFamily: 'Shrikhand',
+                        shadow: true,
+                        shadowColor: '#ec4899',
+                        bold: true,
+                        animation: 'pulse'
+                    }
+                ];
+                selectedFilter = 'cyberpunk';
+                activeAnimationEffect = 'neon-glow';
+            } else if (presetType === 'summer') {
+                mediaFile = { type: 'color', color: '#7c2d12', scale: 1, yOffset: 0 };
+                textLayers = [
+                    {
+                        id: 'text-' + Date.now(),
+                        type: 'text',
+                        text: 'Brisa de Verão',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 3 + 100,
+                        fontSize: 85,
+                        width: 800,
+                        align: 'center',
+                        color: '#fef08a',
+                        fontFamily: 'Pacifico',
+                        shadow: false,
+                        bold: false,
+                        animation: 'float'
+                    }
+                ];
+                selectedFilter = 'warmth';
+                activeAnimationEffect = 'lightleaks';
+            } else if (presetType === 'snow') {
+                mediaFile = { type: 'color', color: '#0f172a', scale: 1, yOffset: 0 };
+                textLayers = [
+                    {
+                        id: 'text-' + Date.now(),
+                        type: 'text',
+                        text: 'Estúdio Nevado',
+                        x: defaultWidth / 2,
+                        y: defaultHeight / 2,
+                        fontSize: 70,
+                        width: 750,
+                        align: 'center',
+                        color: '#ffffff',
+                        fontFamily: 'Dancing Script',
+                        shadow: true,
+                        shadowColor: '#3b82f6',
+                        bold: true,
+                        animation: 'pulse'
+                    }
+                ];
+                selectedFilter = 'cool';
+                activeAnimationEffect = 'falling-snow';
+            }
+            selectedTextId = textLayers[0]?.id || null;
+            updateTextListUI();
+            showToast(`Preset "${presetType}" aplicado com sucesso!`);
+        }
+
+        // --- CONFIGURAÇÃO DE INTERAÇÃO DIRETA NO CANVAS (ARRASAR / REDIMENSIONAR) ---
+        function setupCanvasInteractions() {
+            const handleStart = (clientX, clientY) => {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const canvasX = (clientX - rect.left) * scaleX;
+                const canvasY = (clientY - rect.top) * scaleY;
+
+                // Checar se clicou em algum elemento (de trás para frente para pegar o que está por cima)
+                for (let i = textLayers.length - 1; i >= 0; i--) {
+                    const el = textLayers[i];
+                    
+                    // Estimativa rápida do retângulo físico do elemento baseado no enquadramento
+                    const h = el.fontSize * 1.5;
+                    const w = el.width || 600;
+                    const elX = el.x - w / 2;
+                    const elY = el.y - h / 2;
+
+                    // Checar região de Redimensionamento (Canto inferior direito da caixa)
+                    const resizeZoneRadius = 50; 
+                    const cornerX = el.x + w / 2;
+                    const cornerY = el.y + h / 2;
+                    const distToCorner = Math.hypot(canvasX - cornerX, canvasY - cornerY);
+
+                    if (distToCorner < resizeZoneRadius) {
+                        dragTarget = el;
+                        isResizing = true;
+                        resizeStartWidth = el.width || 600;
+                        selectedTextId = el.id;
+                        updateTextListUI();
+                        return;
+                    }
+
+                    // Checar região de arraste normal
+                    if (canvasX >= elX && canvasX <= elX + w && canvasY >= elY && canvasY <= elY + h) {
+                        dragTarget = el;
+                        isResizing = false;
+                        dragOffsetX = canvasX - el.x;
+                        dragOffsetY = canvasY - el.y;
+                        selectedTextId = el.id;
+                        updateTextListUI();
+                        return;
+                    }
+                }
+            };
+
+            const handleMove = (clientX, clientY) => {
+                if (!dragTarget) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const canvasX = (clientX - rect.left) * scaleX;
+                const canvasY = (clientY - rect.top) * scaleY;
+
+                if (isResizing) {
+                    // Mudar a largura baseada na distância do centro do elemento
+                    const currentDistX = Math.abs(canvasX - dragTarget.x) * 2;
+                    dragTarget.width = Math.max(150, Math.min(1000, currentDistX));
+                    // Opcional: ajustar dinamicamente o tamanho da fonte junto com a caixa
+                    if (dragTarget.width < resizeStartWidth * 0.8) {
+                        dragTarget.fontSize = Math.max(15, dragTarget.fontSize - 0.5);
+                    } else if (dragTarget.width > resizeStartWidth * 1.2) {
+                        dragTarget.fontSize = Math.min(120, dragTarget.fontSize + 0.5);
+                    }
+                } else {
+                    dragTarget.x = Math.max(0, Math.min(defaultWidth, canvasX - dragOffsetX));
+                    dragTarget.y = Math.max(0, Math.min(defaultHeight, canvasY - dragOffsetY));
+                }
+            };
+
+            const handleEnd = () => {
+                dragTarget = null;
+                isResizing = false;
+            };
+
+            // Eventos do Mouse
+            canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
+            window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
+            window.addEventListener('mouseup', handleEnd);
+
+            // Eventos de Toque (Celular) com preventDefault seguro
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    handleStart(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    handleMove(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('touchend', handleEnd);
         }
 
         // --- GERENCIAMENTO DE MÍDIA (UPLOAD) ---
@@ -1319,26 +906,104 @@
             if (mediaFile) mediaFile.scale = parseFloat(value);
         }
 
-        // --- SISTEMA DE TEXTOS ---
+        function updateMediaOffset(value) {
+            if (mediaFile) mediaFile.yOffset = parseInt(value);
+        }
+
+        function updateStoryDuration(val) {
+            animationDuration = parseInt(val);
+            document.getElementById('storyDurationVal').innerText = `${animationDuration}s`;
+            document.getElementById('storyDurationSlider').value = animationDuration;
+        }
+
+        function toggleAutoSync(checked) {
+            autoSyncEnabled = checked;
+            if (autoSyncEnabled) {
+                syncDurationWithAudio();
+            }
+        }
+
+        function syncDurationWithAudio() {
+            if (!autoSyncEnabled || audioTracks.length === 0) return;
+            let maxAudioDuration = 0;
+            audioTracks.forEach(track => {
+                const trackLen = (track.endTime || track.duration) - (track.startTime || 0);
+                if (trackLen > maxAudioDuration) maxAudioDuration = trackLen;
+            });
+
+            if (maxAudioDuration > 0) {
+                const safeDuration = Math.min(60, Math.max(5, Math.ceil(maxAudioDuration)));
+                updateStoryDuration(safeDuration);
+                showToast(`Vídeo sincronizado para ${safeDuration} segundos.`);
+            }
+        }
+
+        // --- BIBLIOTECA DE FIGURINHAS (STICKERS/EMOJIS/FORMAS) ---
+        function openStickersPanel() {
+            document.getElementById('stickersModal').classList.remove('hidden');
+        }
+
+        function closeStickersPanel() {
+            document.getElementById('stickersModal').classList.add('hidden');
+        }
+
+        function addStickerElement(emoji) {
+            const newSticker = {
+                id: 'sticker-' + Date.now(),
+                type: 'sticker',
+                text: emoji,
+                x: defaultWidth / 2,
+                y: defaultHeight / 2,
+                fontSize: 120,
+                width: 250,
+                animation: 'none'
+            };
+            textLayers.push(newSticker);
+            selectedTextId = newSticker.id;
+            updateTextListUI();
+            closeStickersPanel();
+            showToast("Figurinha adicionada!");
+        }
+
+        function addFormElement(shapeType) {
+            const newForm = {
+                id: 'form-' + Date.now(),
+                type: 'form',
+                shape: shapeType,
+                x: defaultWidth / 2,
+                y: defaultHeight / 2,
+                width: 300,
+                height: 300,
+                color: '#ec4899',
+                animation: 'none'
+            };
+            textLayers.push(newForm);
+            selectedTextId = newForm.id;
+            updateTextListUI();
+            closeStickersPanel();
+            showToast("Forma decorativa adicionada!");
+        }
+
+        // --- SISTEMA DE TEXTO E ELEMENTOS ---
         function addNewText() {
             const newText = {
                 id: 'text-' + Date.now(),
-                text: 'Insira seu texto comprido aqui para testar a quebra automática.',
+                type: 'text',
+                text: 'Insira seu texto comprido aqui.',
                 x: defaultWidth / 2,
                 y: defaultHeight / 2,
-                fontSize: 45,
+                fontSize: 50,
                 width: 700,
                 align: 'center',
                 color: '#ffffff',
                 fontFamily: 'Plus Jakarta Sans',
                 shadow: true,
                 shadowColor: '#000000',
-                animation: 'none',
-                bold: false
+                bold: false,
+                animation: 'none'
             };
             textLayers.push(newText);
             selectedTextId = newText.id;
-            selectedStickerId = null;
             updateTextListUI();
             showToast("Texto adicionado!");
         }
@@ -1348,7 +1013,7 @@
             container.innerHTML = '';
 
             if (textLayers.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-4">Nenhum texto no Story.</p>`;
+                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-4">Nenhum elemento no Story.</p>`;
                 return;
             }
 
@@ -1358,99 +1023,112 @@
                 card.className = `bg-zinc-950 p-3 rounded-xl border transition-all space-y-3 relative ${isSelected ? 'border-purple-500 ring-1 ring-purple-500' : 'border-zinc-850'}`;
                 card.onclick = () => {
                     selectedTextId = layer.id;
-                    selectedStickerId = null;
                     updateTextListHighlight();
                 };
-                card.innerHTML = `
-                    <div class="flex items-center justify-between gap-2">
-                        <span class="text-[10px] font-bold ${isSelected ? 'text-purple-400' : 'text-zinc-500'}">TEXTO #${index + 1} ${isSelected ? '(ATIVO)' : ''}</span>
-                        <button onclick="removeText('${layer.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
-                    
-                    <div>
-                        <span class="text-[10px] text-zinc-500 block mb-1">Conteúdo do Texto (Suporta Enter)</span>
-                        <textarea oninput="updateTextProperty('${layer.id}', 'text', this.value)" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-purple-500 resize-none font-medium">${layer.text}</textarea>
-                    </div>
 
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <span class="text-[10px] text-zinc-500 block mb-1">Fonte</span>
-                            <select onchange="updateTextProperty('${layer.id}', 'fontFamily', this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-1.5 py-1 text-xs text-zinc-300">
-                                ${fontsAvailable.map(f => `<option value="${f.name}" ${layer.fontFamily === f.name ? 'selected' : ''}>${f.name}</option>`).join('')}
-                            </select>
+                if (layer.type === 'text') {
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] font-bold ${isSelected ? 'text-purple-400' : 'text-zinc-500'}">TEXTO #${index + 1} ${isSelected ? '(ATIVO)' : ''}</span>
+                            <button onclick="removeText('${layer.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
                         </div>
+                        
                         <div>
-                            <span class="text-[10px] text-zinc-500 block mb-1">Cor</span>
-                            <div class="flex items-center gap-1">
-                                <input type="color" value="${layer.color}" oninput="updateTextProperty('${layer.id}', 'color', this.value)" class="w-8 h-6 bg-transparent border border-zinc-800 rounded cursor-pointer">
-                                <span class="text-[10px] font-mono">${layer.color}</span>
+                            <textarea oninput="updateTextProperty('${layer.id}', 'text', this.value)" rows="2" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 focus:outline-none focus:border-purple-500 resize-none">${layer.text}</textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[10px] text-zinc-500 block mb-1">Fonte</span>
+                                <select onchange="updateTextProperty('${layer.id}', 'fontFamily', this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-1.5 py-1 text-xs text-zinc-300">
+                                    ${fontsAvailable.map(f => `<option value="${f.name}" ${layer.fontFamily === f.name ? 'selected' : ''}>${f.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-zinc-500 block mb-1">Cor</span>
+                                <div class="flex items-center gap-1">
+                                    <input type="color" value="${layer.color}" oninput="updateTextProperty('${layer.id}', 'color', this.value)" class="w-8 h-6 bg-transparent border border-zinc-800 rounded cursor-pointer">
+                                    <span class="text-[10px] font-mono">${layer.color}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <span class="text-[10px] text-zinc-500 block mb-1">Estilo & Alinhamento</span>
-                            <div class="flex gap-1 bg-zinc-900 p-0.5 rounded-lg border border-zinc-800">
-                                <button onclick="updateTextProperty('${layer.id}', 'bold', ${!layer.bold}); updateTextListUI(); event.stopPropagation();" class="flex-1 py-1 flex justify-center items-center rounded ${layer.bold ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}" title="Negrito">
-                                    <i data-lucide="bold" class="w-3.5 h-3.5"></i>
-                                </button>
-                                <button onclick="updateTextProperty('${layer.id}', 'align', 'left'); event.stopPropagation();" class="flex-1 py-1 flex justify-center rounded ${layer.align === 'left' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}" title="Esquerda">
-                                    <i data-lucide="align-left" class="w-3.5 h-3.5"></i>
-                                </button>
-                                <button onclick="updateTextProperty('${layer.id}', 'align', 'center'); event.stopPropagation();" class="flex-1 py-1 flex justify-center rounded ${layer.align === 'center' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}" title="Centralizado">
-                                    <i data-lucide="align-center" class="w-3.5 h-3.5"></i>
-                                </button>
-                                <button onclick="updateTextProperty('${layer.id}', 'align', 'right'); event.stopPropagation();" class="flex-1 py-1 flex justify-center rounded ${layer.align === 'right' ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}" title="Direita">
-                                    <i data-lucide="align-right" class="w-3.5 h-3.5"></i>
-                                </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[10px] text-zinc-500 block mb-1">Alinhamento</span>
+                                <div class="grid grid-cols-3 gap-1 bg-zinc-900 p-0.5 rounded-lg border border-zinc-800">
+                                    <button onclick="updateTextProperty('${layer.id}', 'align', 'left')" class="py-1 flex justify-center rounded ${layer.align === 'left' ? 'bg-purple-600 text-white' : 'text-zinc-400'}">
+                                        <i data-lucide="align-left" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button onclick="updateTextProperty('${layer.id}', 'align', 'center')" class="py-1 flex justify-center rounded ${layer.align === 'center' ? 'bg-purple-600 text-white' : 'text-zinc-400'}">
+                                        <i data-lucide="align-center" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                    <button onclick="updateTextProperty('${layer.id}', 'align', 'right')" class="py-1 flex justify-center rounded ${layer.align === 'right' ? 'bg-purple-600 text-white' : 'text-zinc-400'}">
+                                        <i data-lucide="align-right" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-zinc-500 block mb-1">Efeito Animado</span>
+                                <select onchange="updateTextProperty('${layer.id}', 'animation', this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-1.5 py-1 text-xs text-zinc-300">
+                                    <option value="none" ${layer.animation === 'none' ? 'selected' : ''}>Nenhum</option>
+                                    <option value="float" ${layer.animation === 'float' ? 'selected' : ''}>Flutuar</option>
+                                    <option value="pulse" ${layer.animation === 'pulse' ? 'selected' : ''}>Pulsar</option>
+                                    <option value="shake" ${layer.animation === 'shake' ? 'selected' : ''}>Tremor (Shake)</option>
+                                    <option value="rainbow" ${layer.animation === 'rainbow' ? 'selected' : ''}>Arco-íris (Rainbow)</option>
+                                </select>
                             </div>
                         </div>
-                        <div>
-                            <span class="text-[10px] text-zinc-500 block mb-1">Efeito Visual / Animação</span>
-                            <select onchange="updateTextProperty('${layer.id}', 'animation', this.value)" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-1.5 py-1 text-xs text-zinc-300">
-                                <option value="none" ${layer.animation === 'none' ? 'selected' : ''}>Estático</option>
-                                <option value="float" ${layer.animation === 'float' ? 'selected' : ''}>Flutuar</option>
-                                <option value="pulse" ${layer.animation === 'pulse' ? 'selected' : ''}>Pulsar</option>
-                                <option value="shake" ${layer.animation === 'shake' ? 'selected' : ''}>📳 Tremor (Shake)</option>
-                                <option value="rainbow" ${layer.animation === 'rainbow' ? 'selected' : ''}>🌈 Arco-íris (Rainbow)</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="space-y-2 pt-1">
-                        <div>
-                            <div class="flex justify-between text-[10px] text-zinc-500 mb-1">
-                                <span>Largura da Caixa</span>
-                                <span class="font-mono text-zinc-300">${layer.width}px</span>
+                        <div class="flex items-center gap-4 pt-1">
+                            <label class="flex items-center gap-1.5 text-xs text-zinc-400 cursor-pointer">
+                                <input type="checkbox" ${layer.bold ? 'checked' : ''} onchange="updateTextProperty('${layer.id}', 'bold', this.checked)" class="accent-purple-500 rounded">
+                                <span class="font-bold">Negrito</span>
+                            </label>
+                            <label class="flex items-center gap-1.5 text-xs text-zinc-400 cursor-pointer">
+                                <input type="checkbox" ${layer.shadow ? 'checked' : ''} onchange="updateTextProperty('${layer.id}', 'shadow', this.checked)" class="accent-purple-500 rounded">
+                                <span>Sombra Neon</span>
+                            </label>
+                        </div>
+                    `;
+                } else if (layer.type === 'sticker') {
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] font-bold ${isSelected ? 'text-purple-400' : 'text-zinc-500'}">EMOJI / STICKER ${isSelected ? '(ATIVO)' : ''}</span>
+                            <button onclick="removeText('${layer.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">${layer.text}</span>
+                            <div class="flex-1">
+                                <span class="text-[10px] text-zinc-500">Tamanho</span>
+                                <input type="range" min="40" max="300" value="${layer.fontSize}" oninput="updateTextProperty('${layer.id}', 'fontSize', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
                             </div>
-                            <input type="range" min="150" max="1000" step="10" value="${layer.width}" oninput="updateTextProperty('${layer.id}', 'width', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                        </div>
+                    `;
+                } else if (layer.type === 'form') {
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[10px] font-bold ${isSelected ? 'text-purple-400' : 'text-zinc-500'}">FORMA (${layer.shape.toUpperCase()}) ${isSelected ? '(ATIVO)' : ''}</span>
+                            <button onclick="removeText('${layer.id}'); event.stopPropagation();" class="text-red-400 hover:text-red-300">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
-                                <div class="flex justify-between text-[10px] text-zinc-500 mb-1">
-                                    <span>Tamanho Letra</span>
-                                    <span class="font-mono text-zinc-300">${layer.fontSize}px</span>
-                                </div>
-                                <input type="range" min="15" max="120" value="${layer.fontSize}" oninput="updateTextProperty('${layer.id}', 'fontSize', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                                <span class="text-[10px] text-zinc-500 block mb-1">Cor</span>
+                                <input type="color" value="${layer.color}" oninput="updateTextProperty('${layer.id}', 'color', this.value)" class="w-full bg-transparent border border-zinc-800 rounded cursor-pointer h-8">
                             </div>
                             <div>
-                                <div class="flex justify-between text-[10px] text-zinc-500 mb-1">
-                                    <span>Posição Vertical</span>
-                                    <span class="font-mono text-zinc-300">${layer.y}px</span>
-                                </div>
-                                <input type="range" min="100" max="1800" value="${layer.y}" oninput="updateTextProperty('${layer.id}', 'y', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                                <span class="text-[10px] text-zinc-500 block mb-1">Largura</span>
+                                <input type="range" min="10" max="800" value="${layer.width}" oninput="updateTextProperty('${layer.id}', 'width', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="flex items-center gap-2 pt-1">
-                        <input type="checkbox" id="shadow-${layer.id}" ${layer.shadow ? 'checked' : ''} onchange="updateTextProperty('${layer.id}', 'shadow', this.checked)" class="accent-purple-500 rounded">
-                        <label for="shadow-${layer.id}" class="text-xs text-zinc-400">Sombra Neon</label>
-                    </div>
-                `;
+                    `;
+                }
                 container.appendChild(card);
             });
             initLucide();
@@ -1463,7 +1141,11 @@
                 const isSelected = selectedTextId === layer.id;
                 const card = cards[index];
                 if (card) {
-                    card.className = `bg-zinc-950 p-3 rounded-xl border transition-all space-y-3 relative ${isSelected ? 'border-purple-500 ring-1 ring-purple-500' : 'border-zinc-850'}`;
+                    if (isSelected) {
+                        card.className = "bg-zinc-950 p-3 rounded-xl border border-purple-500 ring-1 ring-purple-500 transition-all space-y-3 relative";
+                    } else {
+                        card.className = "bg-zinc-950 p-3 rounded-xl border border-zinc-850 transition-all space-y-3 relative";
+                    }
                 }
             });
         }
@@ -1472,9 +1154,6 @@
             const index = textLayers.findIndex(t => t.id === id);
             if (index !== -1) {
                 textLayers[index][property] = value;
-                if (property === 'align') {
-                    updateTextListUI();
-                }
             }
         }
 
@@ -1484,7 +1163,7 @@
                 selectedTextId = textLayers.length > 0 ? textLayers[0].id : null;
             }
             updateTextListUI();
-            showToast("Texto removido.");
+            showToast("Elemento removido.");
         }
 
         // --- ALGORITMO DE QUEBRA DE LINHAS (WORD WRAP) ---
@@ -1515,66 +1194,97 @@
             return allLines;
         }
 
-        // --- SISTEMA DE MIXAGEM DE ÁUDIO MULTICANAL ---
-        function handleAudioUpload(input) {
+        // --- FILTROS DE COR ---
+        function setFilter(filterName) {
+            selectedFilter = filterName;
+            showToast(`Filtro "${filterName}" aplicado.`);
+        }
+
+        function setActiveAnimationEffect(effectName) {
+            activeAnimationEffect = effectName;
+            particles = [];
+            showToast(`Efeito dinâmico "${effectName}" carregado.`);
+        }
+
+        // --- SISTEMA AVANÇADO DE ÁUDIO (CORTAR & MIXAR MULTICANAIS) ---
+        function addAudioTrack(input) {
             const file = input.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 const audio = new Audio(e.target.result);
-                audio.loop = true;
+                audio.loop = false; // desativado o loop direto do elemento para gerenciar via código
                 
-                const newTrack = {
-                    id: 'audio-' + Date.now(),
-                    name: file.name,
-                    src: audio,
-                    originalData: e.target.result,
-                    volume: 0.8 // Volume padrão inicial em 80%
+                audio.onloadedmetadata = function() {
+                    const track = {
+                        id: 'audio-' + Date.now(),
+                        file: file,
+                        src: audio,
+                        name: file.name,
+                        volume: 0.8,
+                        startTime: 0,
+                        endTime: Math.min(60, audio.duration),
+                        duration: audio.duration,
+                        originalData: e.target.result
+                    };
+                    audioTracks.push(track);
+                    updateAudioTracksUI();
+                    syncDurationWithAudio();
+                    showToast("Áudio adicionado ao mixer!");
                 };
-
-                audioTracks.push(newTrack);
-                updateAudioTracksUI();
-
-                if (isPlaying) {
-                    audio.volume = newTrack.volume;
-                    audio.play().catch(()=>{});
-                }
-
-                showToast("Áudio importado e adicionado à mesa de som!");
             };
             reader.readAsDataURL(file);
-            input.value = ""; // Reseta o input para carregar o mesmo arquivo de novo
         }
 
         function updateAudioTracksUI() {
-            const container = document.getElementById('audioTracksList');
+            const container = document.getElementById('audioMixerContainer');
             container.innerHTML = '';
 
             if (audioTracks.length === 0) {
-                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-4">Nenhuma faixa sonora ativa.</p>`;
-                document.getElementById('audioStatusText').innerText = "Sem trilha sonora";
+                container.innerHTML = `<p class="text-xs text-zinc-500 text-center py-4">Nenhuma faixa de áudio adicionada.</p>`;
                 return;
             }
 
-            document.getElementById('audioStatusText').innerText = `${audioTracks.length} trilha(s) ativa(s)`;
-
             audioTracks.forEach(track => {
                 const card = document.createElement('div');
-                card.className = "bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-2";
+                card.className = "bg-zinc-950 p-3 rounded-xl border border-zinc-800 space-y-3";
+                
                 card.innerHTML = `
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="text-zinc-300 font-semibold truncate max-w-[190px]">${track.name}</span>
-                        <button onclick="removeAudioTrack('${track.id}')" class="text-red-400 hover:text-red-300 text-[10px] flex items-center gap-0.5">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Excluir
-                        </button>
+                    <div class="flex items-center justify-between gap-2 border-b border-zinc-850 pb-2">
+                        <div class="flex items-center gap-1.5 truncate max-w-[70%]">
+                            <i data-lucide="music" class="w-3.5 h-3.5 text-purple-400 shrink-0"></i>
+                            <span class="text-[11px] font-semibold text-zinc-200 truncate">${track.name}</span>
+                        </div>
+                        <button onclick="removeAudioTrack('${track.id}')" class="text-red-400 hover:text-red-300 text-[10px] font-bold">Excluir</button>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="volume-2" class="w-4 h-4 text-zinc-500"></i>
-                        <input type="range" min="0" max="1" step="0.05" value="${track.volume}" 
-                               oninput="updateTrackVolume('${track.id}', this.value)" 
-                               class="flex-1 accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
-                        <span class="text-[10px] font-mono text-zinc-400 min-w-[30px] text-right">${Math.round(track.volume * 100)}%</span>
+
+                    <!-- Gráfico De Ondas Estilizado / Timeline do corte -->
+                    <div class="bg-zinc-900/60 p-2 rounded-lg border border-zinc-850 space-y-1.5">
+                        <div class="flex items-center justify-between text-[9px] text-zinc-500">
+                            <span>🕒 Cortar Áudio (Original: ${Math.floor(track.duration)}s)</span>
+                            <span class="font-mono text-purple-300 font-bold">${Math.floor(track.startTime)}s até ${Math.floor(track.endTime)}s</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <span class="text-[8px] text-zinc-500 block">Iniciar em (s)</span>
+                                <input type="range" min="0" max="${Math.floor(track.duration)}" step="1" value="${Math.floor(track.startTime)}" oninput="updateAudioTrim('${track.id}', 'startTime', parseFloat(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                            </div>
+                            <div>
+                                <span class="text-[8px] text-zinc-500 block">Terminar em (s)</span>
+                                <input type="range" min="1" max="${Math.floor(track.duration)}" step="1" value="${Math.floor(track.endTime)}" oninput="updateAudioTrim('${track.id}', 'endTime', parseFloat(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Volume da Faixa -->
+                    <div>
+                        <div class="flex justify-between items-center text-[9px] text-zinc-500 mb-1">
+                            <span>🔊 Volume da Faixa</span>
+                            <span class="font-bold text-zinc-300">${Math.floor(track.volume * 100)}%</span>
+                        </div>
+                        <input type="range" min="0" max="1" step="0.05" value="${track.volume}" oninput="updateAudioVolume('${track.id}', parseFloat(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
                     </div>
                 `;
                 container.appendChild(card);
@@ -1582,54 +1292,163 @@
             initLucide();
         }
 
-        function updateTrackVolume(id, vol) {
-            const track = audioTracks.find(t => t.id === id);
+        function updateAudioTrim(trackId, param, value) {
+            const track = audioTracks.find(t => t.id === trackId);
             if (track) {
-                track.volume = parseFloat(vol);
-                if (track.src) {
-                    track.src.volume = track.volume;
+                if (param === 'startTime') {
+                    track.startTime = Math.min(value, track.endTime - 1);
+                } else if (param === 'endTime') {
+                    track.endTime = Math.max(value, track.startTime + 1);
                 }
+                updateAudioTracksUI();
+                syncDurationWithAudio();
+            }
+        }
+
+        function updateAudioVolume(trackId, value) {
+            const track = audioTracks.find(t => t.id === trackId);
+            if (track) {
+                track.volume = value;
+                track.src.volume = value;
                 updateAudioTracksUI();
             }
         }
 
-        function removeAudioTrack(id) {
-            const track = audioTracks.find(t => t.id === id);
-            if (track && track.src) {
+        function removeAudioTrack(trackId) {
+            const track = audioTracks.find(t => t.id === trackId);
+            if (track) {
                 track.src.pause();
             }
-            audioTracks = audioTracks.filter(t => t.id !== id);
+            audioTracks = audioTracks.filter(t => t.id !== trackId);
             updateAudioTracksUI();
-            showToast("Faixa de áudio removida.");
+            syncDurationWithAudio();
+            showToast("Faixa de áudio excluída.");
         }
 
+        // --- ESTÚDIO DE GRAVAÇÃO DE VOZ (LOCUÇÃO) ---
+        function toggleVoiceoverRecording() {
+            if (isRecordingVoice) {
+                stopVoiceoverRecording();
+            } else {
+                startVoiceoverRecording();
+            }
+        }
+
+        async function startVoiceoverRecording() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast("Seu navegador não suporta gravação de voz.", true);
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorderVoice = new MediaRecorder(stream);
+                voiceChunks = [];
+
+                mediaRecorderVoice.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        voiceChunks.push(e.data);
+                    }
+                };
+
+                mediaRecorderVoice.onstop = () => {
+                    const blob = new Blob(voiceChunks, { type: 'audio/webm' });
+                    const audioURL = URL.createObjectURL(blob);
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const audio = new Audio(audioURL);
+                        audio.onloadedmetadata = function() {
+                            const track = {
+                                id: 'audio-voice-' + Date.now(),
+                                src: audio,
+                                name: "🎤 Locução Voz " + new Date().toLocaleTimeString(),
+                                volume: 0.9,
+                                startTime: 0,
+                                endTime: audio.duration,
+                                duration: audio.duration,
+                                originalData: e.target.result
+                            };
+                            audioTracks.push(track);
+                            updateAudioTracksUI();
+                            syncDurationWithAudio();
+                            showToast("Locução adicionada ao mixer!");
+                        };
+                    };
+                    reader.readAsDataURL(blob);
+                };
+
+                mediaRecorderVoice.start();
+                isRecordingVoice = true;
+
+                // Animação de gravação no botão
+                const btn = document.getElementById('voiceoverBtn');
+                btn.classList.add('border-red-500', 'bg-red-950/20', 'animate-pulse');
+                document.getElementById('voiceoverBtnText').innerText = "Parar Gravação";
+                document.getElementById('micIcon').classList.add('text-red-400');
+                showToast("Gravando voz...");
+
+            } catch (err) {
+                console.error("Erro ao acessar microfone: ", err);
+                showToast("Permissão negada para o microfone.", true);
+            }
+        }
+
+        function stopVoiceoverRecording() {
+            if (mediaRecorderVoice && isRecordingVoice) {
+                mediaRecorderVoice.stop();
+                // Parar todos os tracks do stream para fechar o microfone fisicamente
+                mediaRecorderVoice.stream.getTracks().forEach(track => track.stop());
+                isRecordingVoice = false;
+
+                const btn = document.getElementById('voiceoverBtn');
+                btn.classList.remove('border-red-500', 'bg-red-950/20', 'animate-pulse');
+                document.getElementById('voiceoverBtnText').innerText = "Gravar Voz";
+                document.getElementById('micIcon').classList.remove('text-red-400');
+            }
+        }
+
+        // --- REPRODUÇÃO & PLAYBACK GERAL ---
         function togglePlayback() {
             isPlaying = !isPlaying;
             const playIcon = document.getElementById('playIcon');
             
             if (isPlaying) {
                 playIcon.setAttribute('data-lucide', 'pause');
+                
+                // Dar play no vídeo de fundo
                 if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                     mediaFile.src.play().catch(()=>{});
                 }
-                // Reproduzir sincronizadamente todas as faixas da mixadora
-                audioTracks.forEach(track => {
-                    if (track.src) {
-                        track.src.volume = track.volume;
-                        track.src.play().catch(()=>{});
-                    }
-                });
+
+                // Iniciar sincronizado todos os canais de áudio baseado no tempo de reprodução atual
+                playAllAudioTracksSnyced();
             } else {
                 playIcon.setAttribute('data-lucide', 'play');
+                
                 if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                     mediaFile.src.pause();
                 }
-                // Pausar todos
+
+                // Pausar todos os canais de áudio
                 audioTracks.forEach(track => {
-                    if (track.src) track.src.pause();
+                    track.src.pause();
                 });
             }
             initLucide();
+        }
+
+        function playAllAudioTracksSnyced() {
+            audioTracks.forEach(track => {
+                const relativeAudioTime = track.startTime + currentTime;
+                if (relativeAudioTime < track.endTime) {
+                    track.src.currentTime = relativeAudioTime;
+                    track.src.volume = track.volume;
+                    track.src.play().catch(()=>{});
+                } else {
+                    track.src.pause();
+                }
+            });
         }
 
         function updateAudioPlaybackUI() {
@@ -1650,16 +1469,28 @@
 
             if (isPlaying) {
                 currentTime += delta;
+                
+                // Lidar com o loop seguro da duração total do Story
                 if (currentTime >= animationDuration) {
                     currentTime = 0;
-                    // Sincronizar todos os áudios no reinício do loop configurado
-                    audioTracks.forEach(track => {
-                        if (track.src) track.src.currentTime = 0;
-                    });
+                    // Resetar audios e fundos de volta ao início
                     if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                         mediaFile.src.currentTime = 0;
                     }
+                    playAllAudioTracksSnyced();
                 }
+
+                // Verificar corte individual de áudio para pausar/tocar no tempo certo se necessário
+                audioTracks.forEach(track => {
+                    const relativeAudioTime = track.startTime + currentTime;
+                    if (relativeAudioTime >= track.endTime) {
+                        track.src.pause();
+                    } else if (track.src.paused) {
+                        // Se o áudio deveria estar tocando mas foi pausado pelo limite, tocar novamente
+                        track.src.currentTime = relativeAudioTime;
+                        track.src.play().catch(()=>{});
+                    }
+                });
             }
 
             const formatTime = (sec) => {
@@ -1678,23 +1509,19 @@
             // 2. Aplicar Filtros Gerais
             applyColorFilters(ctx);
 
-            // 3. Desenhar Efeitos de Partícula (e novos filtros de vídeo)
+            // 3. Desenhar Efeitos de Partícula
             drawOverlayEffects(ctx, delta);
 
-            // 4. Desenhar Stickers e Formas
-            drawStickers(ctx, true);
-
-            // 5. Desenhar Textos com quebra automática, bold e animações
+            // 4. Desenhar Textos com quebra automática (e guias se ativo)
             drawTexts(ctx, true);
 
-            // Se o preview simulado estiver ativo, desenha idêntico nele
+            // Se o preview simulado estiver ativo, desenha idêntico nele (sem as caixas pontilhadas guias)
             if (isPhonePreviewActive) {
                 previewCtx.clearRect(0, 0, defaultWidth, defaultHeight);
                 drawBackground(previewCtx);
                 applyColorFilters(previewCtx);
                 drawOverlayEffects(previewCtx, delta);
-                drawStickers(previewCtx, false);
-                drawTexts(previewCtx, false);
+                drawTexts(previewCtx, false); // false para ocultar as caixas guia
             }
 
             requestAnimationFrame(renderLoop);
@@ -1877,133 +1704,6 @@
                 });
             }
 
-            else if (activeAnimationEffect === 'fireflies') {
-                // Efeito Pirilampos (Vagalumes)
-                if (particles.length < 60) {
-                    particles.push({
-                        x: Math.random() * defaultWidth,
-                        y: Math.random() * defaultHeight + defaultHeight,
-                        size: Math.random() * 5 + 2,
-                        speed: Math.random() * 30 + 20,
-                        frequency: Math.random() * 3 + 1,
-                        amplitude: Math.random() * 20 + 5,
-                        phase: Math.random() * 100,
-                        opacitySpeed: Math.random() * 2 + 1
-                    });
-                }
-
-                particles.forEach((p, index) => {
-                    p.y -= p.speed * delta;
-                    p.x += Math.sin(p.phase + currentTime * p.frequency) * p.amplitude * delta;
-
-                    if (p.y < -30) {
-                        particles[index] = {
-                            x: Math.random() * defaultWidth,
-                            y: defaultHeight + 20,
-                            size: Math.random() * 5 + 2,
-                            speed: Math.random() * 30 + 20,
-                            frequency: Math.random() * 3 + 1,
-                            amplitude: Math.random() * 20 + 5,
-                            phase: Math.random() * 100,
-                            opacitySpeed: Math.random() * 2 + 1
-                        };
-                    }
-
-                    const blink = Math.abs(Math.sin(currentTime * p.opacitySpeed)) * 0.7 + 0.3;
-                    targetCtx.save();
-                    targetCtx.shadowBlur = p.size * 3;
-                    targetCtx.shadowColor = 'rgba(234, 179, 8, 0.8)';
-                    targetCtx.fillStyle = `rgba(234, 179, 8, ${blink})`;
-                    targetCtx.beginPath();
-                    targetCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    targetCtx.fill();
-                    targetCtx.restore();
-                });
-            }
-
-            else if (activeAnimationEffect === 'rain-drops') {
-                if (particles.length < 120) {
-                    particles.push({
-                        x: Math.random() * defaultWidth,
-                        y: Math.random() * -defaultHeight,
-                        length: Math.random() * 40 + 20,
-                        speed: Math.random() * 1200 + 800,
-                        opacity: Math.random() * 0.3 + 0.1
-                    });
-                }
-
-                targetCtx.strokeStyle = 'rgba(156, 163, 175, 0.4)';
-                targetCtx.lineWidth = 1.5;
-                particles.forEach((p, index) => {
-                    p.y += p.speed * delta;
-                    p.x += (p.speed * 0.05) * delta;
-
-                    if (p.y > defaultHeight) {
-                        particles[index] = {
-                            x: Math.random() * defaultWidth,
-                            y: -50,
-                            length: Math.random() * 40 + 20,
-                            speed: Math.random() * 1200 + 800,
-                            opacity: Math.random() * 0.3 + 0.1
-                        };
-                    }
-
-                    targetCtx.save();
-                    targetCtx.globalAlpha = p.opacity;
-                    targetCtx.beginPath();
-                    targetCtx.moveTo(p.x, p.y);
-                    targetCtx.lineTo(p.x + 2, p.y + p.length);
-                    targetCtx.stroke();
-                    targetCtx.restore();
-                });
-            }
-
-            else if (activeAnimationEffect === 'light-leaks') {
-                const leakX1 = defaultWidth * 0.1 + Math.sin(currentTime * 0.4) * 120;
-                const leakY1 = defaultHeight * 0.1 + Math.cos(currentTime * 0.3) * 100;
-                const radGrad1 = targetCtx.createRadialGradient(leakX1, leakY1, 30, leakX1, leakY1, 650);
-                radGrad1.addColorStop(0, 'rgba(239, 68, 68, 0.45)');
-                radGrad1.addColorStop(0.4, 'rgba(249, 115, 22, 0.25)');
-                radGrad1.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                
-                targetCtx.save();
-                targetCtx.fillStyle = radGrad1;
-                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
-
-                const leakX2 = defaultWidth * 0.95 + Math.cos(currentTime * 0.5) * 150;
-                const leakY2 = defaultHeight * 0.85 + Math.sin(currentTime * 0.4) * 150;
-                const radGrad2 = targetCtx.createRadialGradient(leakX2, leakY2, 50, leakX2, leakY2, 800);
-                radGrad2.addColorStop(0, 'rgba(168, 85, 247, 0.35)');
-                radGrad2.addColorStop(0.5, 'rgba(236, 72, 153, 0.2)');
-                radGrad2.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                targetCtx.fillStyle = radGrad2;
-                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
-                targetCtx.restore();
-            }
-
-            else if (activeAnimationEffect === 'cyber-grid') {
-                targetCtx.save();
-                targetCtx.strokeStyle = 'rgba(168, 85, 247, 0.22)';
-                targetCtx.lineWidth = 3;
-                
-                const gridOffset = (currentTime * 120) % 150;
-                for(let y = gridOffset; y < defaultHeight; y += 150) {
-                    targetCtx.beginPath();
-                    targetCtx.moveTo(0, y);
-                    targetCtx.lineTo(defaultWidth, y);
-                    targetCtx.stroke();
-                }
-
-                const centerX = defaultWidth / 2;
-                for(let x = -defaultWidth; x < defaultWidth * 2; x += 150) {
-                    targetCtx.beginPath();
-                    targetCtx.moveTo(x + (currentTime * 10) % 150, 0);
-                    targetCtx.lineTo(x * 1.6 - centerX + (currentTime * 10) % 150, defaultHeight);
-                    targetCtx.stroke();
-                }
-                targetCtx.restore();
-            }
-
             else if (activeAnimationEffect === 'vhs-glitch') {
                 if (Math.random() > 0.85) {
                     targetCtx.save();
@@ -2033,114 +1733,81 @@
                 const timeStr = today.toTimeString().split(' ')[0];
                 targetCtx.fillText(timeStr, defaultWidth - 360, defaultHeight - 100);
             }
-        }
 
-        function drawStickers(targetCtx, showGuides = true) {
-            stickerLayers.forEach(sticker => {
+            else if (activeAnimationEffect === 'fireflies') {
+                if (particles.length < 40) {
+                    particles.push({
+                        x: Math.random() * defaultWidth,
+                        y: Math.random() * defaultHeight,
+                        size: Math.random() * 6 + 2,
+                        speedX: (Math.random() - 0.5) * 50,
+                        speedY: (Math.random() - 0.5) * 50,
+                        pulse: Math.random() * 3 + 1
+                    });
+                }
+
                 targetCtx.save();
-                targetCtx.translate(sticker.x, sticker.y);
+                particles.forEach(p => {
+                    p.x += p.speedX * delta;
+                    p.y += p.speedY * delta;
 
-                if (sticker.type === 'emoji') {
-                    targetCtx.font = `${sticker.size}px "Plus Jakarta Sans", sans-serif`;
-                    targetCtx.textAlign = 'center';
-                    targetCtx.textBaseline = 'middle';
-                    targetCtx.fillText(sticker.value, 0, 0);
-                } 
-                
-                else if (sticker.type === 'shape') {
-                    targetCtx.fillStyle = sticker.color || '#ffffff';
-                    targetCtx.strokeStyle = sticker.color || '#ffffff';
-                    targetCtx.lineWidth = 8;
+                    if (p.x < 0 || p.x > defaultWidth) p.speedX *= -1;
+                    if (p.y < 0 || p.y > defaultHeight) p.speedY *= -1;
 
-                    const s = sticker.size;
-
-                    if (sticker.value === 'heart') {
-                        targetCtx.beginPath();
-                        targetCtx.moveTo(0, s / 4);
-                        targetCtx.bezierCurveTo(0, -s / 3, -s / 2, -s / 3, -s / 2, s / 4);
-                        targetCtx.bezierCurveTo(-s / 2, s / 1.5, 0, s * 0.95, 0, s);
-                        targetCtx.bezierCurveTo(0, s * 0.95, s / 2, s / 1.5, s / 2, s / 4);
-                        targetCtx.bezierCurveTo(s / 2, -s / 3, 0, -s / 3, 0, s / 4);
-                        targetCtx.fill();
-                    } 
-                    
-                    else if (sticker.value === 'star') {
-                        targetCtx.beginPath();
-                        const spikes = 5;
-                        const outerRad = s / 2;
-                        const innerRad = s / 4;
-                        let rot = Math.PI / 2 * 3;
-                        let cx = 0, cy = 0;
-                        const step = Math.PI / spikes;
-
-                        targetCtx.moveTo(0, -outerRad);
-                        for (let i = 0; i < spikes; i++) {
-                            cx = Math.cos(rot) * outerRad;
-                            cy = Math.sin(rot) * outerRad;
-                            targetCtx.lineTo(cx, cy);
-                            rot += step;
-
-                            cx = Math.cos(rot) * innerRad;
-                            cy = Math.sin(rot) * innerRad;
-                            targetCtx.lineTo(cx, cy);
-                            rot += step;
-                        }
-                        targetCtx.lineTo(0, -outerRad);
-                        targetCtx.closePath();
-                        targetCtx.fill();
-                    } 
-                    
-                    else if (sticker.value === 'circle-highlight') {
-                        targetCtx.beginPath();
-                        targetCtx.setLineDash([20, 15]);
-                        targetCtx.arc(0, 0, s / 2, 0, Math.PI * 2);
-                        targetCtx.stroke();
-                    } 
-                    
-                    else if (sticker.value === 'badge-retro') {
-                        targetCtx.beginPath();
-                        const points = 16;
-                        for (let i = 0; i < points; i++) {
-                            const angle = (i / points) * Math.PI * 2;
-                            const radius = i % 2 === 0 ? s / 2 : s / 2.3;
-                            const x = Math.cos(angle) * radius;
-                            const y = Math.sin(angle) * radius;
-                            if (i === 0) targetCtx.moveTo(x, y);
-                            else targetCtx.lineTo(x, y);
-                        }
-                        targetCtx.closePath();
-                        targetCtx.fill();
-                    }
-                }
-
-                targetCtx.restore();
-
-                // Desenhar Guia e Botão de Redimensionamento ao Selecionar
-                if (showGuides && selectedStickerId === sticker.id && !isPhonePreviewActive) {
-                    targetCtx.save();
-                    targetCtx.translate(sticker.x, sticker.y);
-                    targetCtx.strokeStyle = 'rgba(168, 85, 247, 0.7)';
-                    targetCtx.lineWidth = 3;
-                    targetCtx.setLineDash([10, 8]);
-                    
-                    const pad = sticker.size / 2 + 10;
-                    targetCtx.strokeRect(-pad, -pad, pad * 2, pad * 2);
-
-                    targetCtx.fillStyle = '#a855f7';
-                    targetCtx.setLineDash([]);
+                    const alpha = Math.abs(Math.sin(currentTime * p.pulse)) * 0.7 + 0.3;
+                    targetCtx.fillStyle = `rgba(234, 179, 8, ${alpha})`;
+                    targetCtx.shadowColor = '#eab308';
+                    targetCtx.shadowBlur = 15;
                     targetCtx.beginPath();
-                    targetCtx.arc(pad, pad, 18, 0, Math.PI * 2);
+                    targetCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                     targetCtx.fill();
+                });
+                targetCtx.restore();
+            }
 
-                    targetCtx.fillStyle = '#ffffff';
-                    targetCtx.font = '14px "Plus Jakarta Sans"';
-                    targetCtx.textAlign = 'center';
-                    targetCtx.textBaseline = 'middle';
-                    targetCtx.fillText('↔', pad, pad);
-
-                    targetCtx.restore();
+            else if (activeAnimationEffect === 'rain') {
+                if (particles.length < 80) {
+                    particles.push({
+                        x: Math.random() * defaultWidth,
+                        y: -50,
+                        length: Math.random() * 40 + 20,
+                        speed: Math.random() * 800 + 400
+                    });
                 }
-            });
+
+                targetCtx.strokeStyle = 'rgba(156, 163, 175, 0.35)';
+                targetCtx.lineWidth = 1.5;
+                particles.forEach((p, index) => {
+                    p.y += p.speed * delta;
+                    p.x += 100 * delta; // leve vento diagonal
+
+                    if (p.y > defaultHeight) {
+                        particles[index] = {
+                            x: Math.random() * defaultWidth,
+                            y: -50,
+                            length: Math.random() * 40 + 20,
+                            speed: Math.random() * 800 + 400
+                        };
+                    }
+
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(p.x, p.y);
+                    targetCtx.lineTo(p.x + 5, p.y + p.length);
+                    targetCtx.stroke();
+                });
+            }
+
+            else if (activeAnimationEffect === 'lightleaks') {
+                targetCtx.save();
+                const leakAlpha = Math.abs(Math.sin(currentTime * 0.5)) * 0.15 + 0.05;
+                const gradient = targetCtx.createRadialGradient(0, 0, 100, 200, 200, 600);
+                gradient.addColorStop(0, `rgba(249, 115, 22, ${leakAlpha})`);
+                gradient.addColorStop(0.5, `rgba(236, 72, 153, ${leakAlpha * 0.5})`);
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                targetCtx.fillStyle = gradient;
+                targetCtx.fillRect(0, 0, defaultWidth, defaultHeight);
+                targetCtx.restore();
+            }
         }
 
         function drawTexts(targetCtx, showGuides = true) {
@@ -2155,101 +1822,168 @@
                 } else if (layer.animation === 'pulse') {
                     scale = 1 + Math.sin(currentTime * 5) * 0.05;
                 } else if (layer.animation === 'shake') {
-                    animatedY += (Math.random() - 0.5) * 12;
-                    targetCtx.translate((Math.random() - 0.5) * 12, 0);
+                    animatedY += (Math.random() - 0.5) * 15;
                 }
 
                 targetCtx.translate(layer.x, animatedY);
                 targetCtx.scale(scale, scale);
 
-                const boldPrefix = layer.bold ? 'bold ' : '';
-                const fontStr = `${boldPrefix}${layer.fontSize}px "${layer.fontFamily}", sans-serif`;
-                const boxWidth = layer.width || 800;
-                const textAlign = layer.align || 'center';
-                const lineHeight = layer.fontSize * 1.25;
+                if (layer.type === 'text') {
+                    const weight = layer.bold ? 'bold' : 'normal';
+                    const fontStr = `${weight} ${layer.fontSize}px "${layer.fontFamily}", sans-serif`;
+                    const boxWidth = layer.width || 800;
+                    const textAlign = layer.align || 'center';
+                    const lineHeight = layer.fontSize * 1.25;
 
-                const lines = getWrappedLines(targetCtx, layer.text, boxWidth, fontStr);
+                    const lines = getWrappedLines(targetCtx, layer.text, boxWidth, fontStr);
 
-                targetCtx.font = fontStr;
-                targetCtx.textAlign = textAlign;
-                targetCtx.textBaseline = 'middle';
-
-                if (layer.shadow) {
-                    targetCtx.shadowColor = layer.shadowColor || '#a855f7';
-                    targetCtx.shadowBlur = 30;
-                    targetCtx.shadowOffsetX = 0;
-                    targetCtx.shadowOffsetY = 0;
-                } else {
-                    targetCtx.shadowBlur = 0;
-                }
-
-                if (layer.animation === 'rainbow') {
-                    const rainbowGrad = targetCtx.createLinearGradient(-boxWidth/2, 0, boxWidth/2, 0);
-                    const shift = (currentTime * 120) % 360;
-                    rainbowGrad.addColorStop(0, `hsl(${shift % 360}, 100%, 70%)`);
-                    rainbowGrad.addColorStop(0.5, `hsl(${(shift + 120) % 360}, 100%, 70%)`);
-                    rainbowGrad.addColorStop(1, `hsl(${(shift + 240) % 360}, 100%, 70%)`);
-                    targetCtx.fillStyle = rainbowGrad;
-                } else {
-                    targetCtx.fillStyle = layer.color;
-                }
-
-                const totalHeight = lines.length * lineHeight;
-                const startY = -totalHeight / 2 + lineHeight / 2;
-
-                lines.forEach((line, lineIndex) => {
-                    let lineX = 0;
-                    if (textAlign === 'left') {
-                        lineX = -boxWidth / 2;
-                    } else if (textAlign === 'right') {
-                        lineX = boxWidth / 2;
-                    }
-                    const lineY = startY + (lineIndex * lineHeight);
-                    targetCtx.fillText(line, lineX, lineY);
-                });
-
-                targetCtx.restore();
-
-                // Desenhar borda de marcação guia ao redor da caixa de texto
-                if (showGuides && selectedTextId === layer.id && !isPhonePreviewActive) {
-                    targetCtx.save();
-                    targetCtx.translate(layer.x, animatedY);
-                    targetCtx.scale(scale, scale);
-
-                    targetCtx.strokeStyle = 'rgba(168, 85, 247, 0.65)';
-                    targetCtx.lineWidth = 3;
-                    targetCtx.setLineDash([15, 10]);
-                    
-                    const totalHeight = lines.length * lineHeight;
-                    const padding = 20;
-
-                    targetCtx.strokeRect(
-                        -boxWidth / 2 - padding, 
-                        -totalHeight / 2 - padding, 
-                        boxWidth + (padding * 2), 
-                        totalHeight + (padding * 2)
-                    );
-
-                    targetCtx.fillStyle = '#a855f7';
-                    targetCtx.setLineDash([]);
-                    targetCtx.beginPath();
-                    const rx = boxWidth / 2 + padding;
-                    const ry = totalHeight / 2 + padding;
-                    targetCtx.arc(rx, ry, 18, 0, Math.PI * 2);
-                    targetCtx.fill();
-
-                    targetCtx.fillStyle = '#ffffff';
-                    targetCtx.font = '14px "Plus Jakarta Sans"';
-                    targetCtx.textAlign = 'center';
+                    targetCtx.font = fontStr;
+                    targetCtx.textAlign = textAlign;
                     targetCtx.textBaseline = 'middle';
-                    targetCtx.fillText('↔', rx, ry);
+
+                    if (layer.shadow) {
+                        targetCtx.shadowColor = layer.shadowColor || '#a855f7';
+                        targetCtx.shadowBlur = 30;
+                        targetCtx.shadowOffsetX = 0;
+                        targetCtx.shadowOffsetY = 0;
+                    } else {
+                        targetCtx.shadowBlur = 0;
+                    }
+
+                    if (layer.animation === 'rainbow') {
+                        const hue = (currentTime * 100) % 360;
+                        targetCtx.fillStyle = `hsl(${hue}, 80%, 65%)`;
+                    } else {
+                        targetCtx.fillStyle = layer.color;
+                    }
+
+                    const totalHeight = lines.length * lineHeight;
+                    const startY = -totalHeight / 2 + lineHeight / 2;
+
+                    lines.forEach((line, lineIndex) => {
+                        let lineX = 0;
+                        if (textAlign === 'left') {
+                            lineX = -boxWidth / 2;
+                        } else if (textAlign === 'right') {
+                            lineX = boxWidth / 2;
+                        }
+                        const lineY = startY + (lineIndex * lineHeight);
+                        targetCtx.fillText(line, lineX, lineY);
+                    });
 
                     targetCtx.restore();
+
+                    // Caixa de edição pontilhada temporária (não entra no preview real de smartphone)
+                    if (showGuides && selectedTextId === layer.id && !isPhonePreviewActive) {
+                        targetCtx.save();
+                        targetCtx.translate(layer.x, animatedY);
+                        targetCtx.scale(scale, scale);
+
+                        targetCtx.strokeStyle = 'rgba(168, 85, 247, 0.7)';
+                        targetCtx.lineWidth = 3;
+                        targetCtx.setLineDash([15, 10]);
+                        
+                        const totalHeight = lines.length * lineHeight;
+                        const padding = 20;
+
+                        targetCtx.strokeRect(
+                            -boxWidth / 2 - padding, 
+                            -totalHeight / 2 - padding, 
+                            boxWidth + (padding * 2), 
+                            totalHeight + (padding * 2)
+                        );
+
+                        // Botão de Redimensionamento Visual
+                        targetCtx.fillStyle = '#10b981'; // verde esmeralda
+                        targetCtx.beginPath();
+                        targetCtx.arc(boxWidth / 2 + padding, totalHeight / 2 + padding, 18, 0, Math.PI * 2);
+                        targetCtx.fill();
+                        targetCtx.fillStyle = '#ffffff';
+                        targetCtx.font = '14px monospace';
+                        targetCtx.textAlign = 'center';
+                        targetCtx.fillText('↔', boxWidth / 2 + padding, totalHeight / 2 + padding);
+
+                        targetCtx.restore();
+                    }
+                } 
+                else if (layer.type === 'sticker') {
+                    targetCtx.font = `${layer.fontSize}px Arial`;
+                    targetCtx.textAlign = 'center';
+                    targetCtx.textBaseline = 'middle';
+                    targetCtx.fillText(layer.text, 0, 0);
+                    targetCtx.restore();
+
+                    if (showGuides && selectedTextId === layer.id && !isPhonePreviewActive) {
+                        targetCtx.save();
+                        targetCtx.translate(layer.x, animatedY);
+                        targetCtx.scale(scale, scale);
+                        targetCtx.strokeStyle = 'rgba(236, 72, 153, 0.7)';
+                        targetCtx.lineWidth = 3;
+                        targetCtx.setLineDash([10, 8]);
+                        const pad = layer.fontSize * 0.6;
+                        targetCtx.strokeRect(-pad, -pad, pad * 2, pad * 2);
+
+                        // Botão de Redimensionamento Visual
+                        targetCtx.fillStyle = '#10b981';
+                        targetCtx.beginPath();
+                        targetCtx.arc(pad, pad, 15, 0, Math.PI * 2);
+                        targetCtx.fill();
+
+                        targetCtx.restore();
+                    }
+                }
+                else if (layer.type === 'form') {
+                    targetCtx.fillStyle = layer.color;
+                    const w = layer.width || 300;
+                    const h = layer.height || 300;
+
+                    if (layer.shape === 'circle') {
+                        targetCtx.beginPath();
+                        targetCtx.arc(0, 0, w / 2, 0, Math.PI * 2);
+                        targetCtx.fill();
+                    } else if (layer.shape === 'square') {
+                        targetCtx.fillRect(-w / 2, -h / 2, w, h);
+                    } else if (layer.shape === 'badge') {
+                        // Estrela/Crachá estilizada de 8 pontas
+                        targetCtx.beginPath();
+                        for (let k = 0; k < 8; k++) {
+                            const angle = (Math.PI / 4) * k;
+                            const r = k % 2 === 0 ? w / 2 : w / 3;
+                            targetCtx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+                        }
+                        targetCtx.closePath();
+                        targetCtx.fill();
+                    } else if (layer.shape === 'line') {
+                        targetCtx.lineWidth = 15;
+                        targetCtx.strokeStyle = layer.color;
+                        targetCtx.beginPath();
+                        targetCtx.moveTo(-w / 2, 0);
+                        targetCtx.lineTo(w / 2, 0);
+                        targetCtx.stroke();
+                    }
+                    targetCtx.restore();
+
+                    if (showGuides && selectedTextId === layer.id && !isPhonePreviewActive) {
+                        targetCtx.save();
+                        targetCtx.translate(layer.x, animatedY);
+                        targetCtx.strokeStyle = 'rgba(168, 85, 247, 0.7)';
+                        targetCtx.lineWidth = 3;
+                        targetCtx.setLineDash([10, 8]);
+                        targetCtx.strokeRect(-w/2 - 10, -h/2 - 10, w + 20, h + 20);
+
+                        // Botão de Redimensionamento Visual
+                        targetCtx.fillStyle = '#10b981';
+                        targetCtx.beginPath();
+                        targetCtx.arc(w/2 + 10, h/2 + 10, 15, 0, Math.PI * 2);
+                        targetCtx.fill();
+
+                        targetCtx.restore();
+                    }
                 }
             });
         }
 
-        // --- SISTEMA DE SALVAMENTO DE PROJETOS E BACKUP (IndexedDB & Local Storage) ---
+        // --- SISTEMA DE SALVAMENTO DE PROJETOS E BACKUP (IndexedDB) ---
         function saveCurrentToProjects() {
             if (!db) {
                 showToast("Erro: Banco de dados local indisponível.", true);
@@ -2259,7 +1993,6 @@
             const projectData = {
                 id: 'proj-' + Date.now(),
                 name: 'Story_' + new Date().toLocaleDateString() + '_' + new Date().toLocaleTimeString(),
-                animationDuration: animationDuration, // Salvando duração customizada
                 mediaType: mediaFile.type,
                 mediaScale: mediaFile.scale,
                 mediaYOffset: mediaFile.yOffset,
@@ -2267,14 +2000,17 @@
                 backgroundImageBase64: mediaFile.type === 'image' ? mediaFile.originalData : null,
                 backgroundVideoBase64: mediaFile.type === 'video' ? mediaFile.originalData : null,
                 textLayers: textLayers,
-                stickerLayers: stickerLayers,
                 selectedFilter: selectedFilter,
                 activeAnimationEffect: activeAnimationEffect,
-                audioTracks: audioTracks.map(track => ({
-                    id: track.id,
-                    name: track.name,
-                    originalData: track.originalData,
-                    volume: track.volume
+                storyDuration: animationDuration,
+                autoSync: autoSyncEnabled,
+                audioTracks: audioTracks.map(t => ({
+                    name: t.name,
+                    volume: t.volume,
+                    startTime: t.startTime,
+                    endTime: t.endTime,
+                    duration: t.duration,
+                    originalData: t.originalData
                 })),
                 savedAt: Date.now()
             };
@@ -2342,14 +2078,6 @@
                 const proj = e.target.result;
                 if (!proj) return;
 
-                // Restaurar duração
-                animationDuration = proj.animationDuration || 60;
-                const durationSlider = document.getElementById('storyDurationSlider');
-                if (durationSlider) {
-                    durationSlider.value = animationDuration;
-                    document.getElementById('storyDurationVal').innerText = animationDuration + 's';
-                }
-
                 if (proj.mediaType === 'image' && proj.backgroundImageBase64) {
                     const img = new Image();
                     img.onload = function() {
@@ -2385,35 +2113,39 @@
                 }
 
                 textLayers = proj.textLayers || [];
-                stickerLayers = proj.stickerLayers || [];
                 selectedTextId = textLayers.length > 0 ? textLayers[0].id : null;
-                selectedStickerId = stickerLayers.length > 0 ? stickerLayers[0].id : null;
                 selectedFilter = proj.selectedFilter || 'none';
                 activeAnimationEffect = proj.activeAnimationEffect || 'none';
+                
+                animationDuration = proj.storyDuration || 15;
+                autoSyncEnabled = proj.autoSync || false;
+                document.getElementById('storyDurationSlider').value = animationDuration;
+                document.getElementById('storyDurationVal').innerText = `${animationDuration}s`;
+                document.getElementById('autoSyncDuration').checked = autoSyncEnabled;
 
-                // Reconstruir mixadora de áudio
-                audioTracks.forEach(track => { if (track.src) track.src.pause(); });
+                // Restaurar canais de áudio
+                audioTracks.forEach(t => t.src.pause());
                 audioTracks = [];
 
                 if (proj.audioTracks && proj.audioTracks.length > 0) {
-                    proj.audioTracks.forEach(tData => {
-                        const audio = new Audio(tData.originalData);
-                        audio.loop = true;
-                        audio.volume = tData.volume;
-                        audioTracks.push({
-                            id: tData.id,
-                            name: tData.name,
+                    proj.audioTracks.forEach(t => {
+                        const audio = new Audio(t.originalData);
+                        const track = {
+                            id: 'audio-' + Date.now() + Math.random(),
                             src: audio,
-                            originalData: tData.originalData,
-                            volume: tData.volume
-                        });
+                            name: t.name,
+                            volume: t.volume,
+                            startTime: t.startTime,
+                            endTime: t.endTime,
+                            duration: t.duration,
+                            originalData: t.originalData
+                        };
+                        audioTracks.push(track);
                     });
                 }
 
-                updateTextListUI();
-                updateStickerListUI();
                 updateAudioTracksUI();
-                
+                updateTextListUI();
                 showToast("Rascunho restaurado com sucesso!");
                 isPlaying = false;
                 updateAudioPlaybackUI();
@@ -2443,10 +2175,9 @@
         function downloadBackupFile() {
             const backupState = {
                 appName: "StoryCraft Studio Backup",
-                version: "1.0",
+                version: "2.0",
                 backupDate: Date.now(),
                 data: {
-                    animationDuration: animationDuration,
                     mediaFile: {
                         type: mediaFile.type,
                         scale: mediaFile.scale,
@@ -2455,14 +2186,17 @@
                         originalData: (mediaFile.type === 'image' || mediaFile.type === 'video') ? mediaFile.originalData : null
                     },
                     textLayers: textLayers,
-                    stickerLayers: stickerLayers,
                     selectedFilter: selectedFilter,
                     activeAnimationEffect: activeAnimationEffect,
-                    audioTracks: audioTracks.map(track => ({
-                        id: track.id,
-                        name: track.name,
-                        originalData: track.originalData,
-                        volume: track.volume
+                    storyDuration: animationDuration,
+                    autoSync: autoSyncEnabled,
+                    audioTracks: audioTracks.map(t => ({
+                        name: t.name,
+                        volume: t.volume,
+                        startTime: t.startTime,
+                        endTime: t.endTime,
+                        duration: t.duration,
+                        originalData: t.originalData
                     }))
                 }
             };
@@ -2471,7 +2205,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `STORYCRAFT_BACKUP_${Date.now()}.json`;
+            a.download = `STORYCRAFT_PRO_BACKUP_${Date.now()}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -2494,14 +2228,6 @@
 
                     const stateData = payload.data;
                     
-                    // Restaurar duração
-                    animationDuration = stateData.animationDuration || 60;
-                    const durationSlider = document.getElementById('storyDurationSlider');
-                    if (durationSlider) {
-                        durationSlider.value = animationDuration;
-                        document.getElementById('storyDurationVal').innerText = animationDuration + 's';
-                    }
-
                     if (stateData.mediaFile.type === 'image' && stateData.mediaFile.originalData) {
                         const img = new Image();
                         img.onload = function() {
@@ -2537,35 +2263,40 @@
                     }
 
                     textLayers = stateData.textLayers || [];
-                    stickerLayers = stateData.stickerLayers || [];
                     selectedTextId = textLayers.length > 0 ? textLayers[0].id : null;
-                    selectedStickerId = stickerLayers.length > 0 ? stickerLayers[0].id : null;
                     selectedFilter = stateData.selectedFilter || 'none';
                     activeAnimationEffect = stateData.activeAnimationEffect || 'none';
+                    
+                    animationDuration = stateData.storyDuration || 15;
+                    autoSyncEnabled = stateData.autoSync || false;
+                    document.getElementById('storyDurationSlider').value = animationDuration;
+                    document.getElementById('storyDurationVal').innerText = `${animationDuration}s`;
+                    document.getElementById('autoSyncDuration').checked = autoSyncEnabled;
 
-                    audioTracks.forEach(track => { if (track.src) track.src.pause(); });
+                    audioTracks.forEach(t => t.src.pause());
                     audioTracks = [];
 
                     if (stateData.audioTracks && stateData.audioTracks.length > 0) {
-                        stateData.audioTracks.forEach(tData => {
-                            const audio = new Audio(tData.originalData);
-                            audio.loop = true;
-                            audio.volume = tData.volume;
-                            audioTracks.push({
-                                id: tData.id,
-                                name: tData.name,
+                        stateData.audioTracks.forEach(t => {
+                            const audio = new Audio(t.originalData);
+                            const track = {
+                                id: 'audio-' + Date.now() + Math.random(),
                                 src: audio,
-                                originalData: tData.originalData,
-                                volume: tData.volume
-                            });
+                                name: t.name,
+                                volume: t.volume,
+                                startTime: t.startTime,
+                                endTime: t.endTime,
+                                duration: t.duration,
+                                originalData: t.originalData
+                            };
+                            audioTracks.push(track);
                         });
                     }
 
-                    updateTextListUI();
-                    updateStickerListUI();
                     updateAudioTracksUI();
+                    updateTextListUI();
                     closeBackupModal();
-                    showToast("Área de trabalho restaurada do arquivo com sucesso!");
+                    showToast("Área de trabalho restaurada com sucesso!");
                     isPlaying = false;
                     updateAudioPlaybackUI();
                 } catch(err) {
@@ -2576,8 +2307,9 @@
             reader.readAsText(file);
         }
 
-        // --- EXPORTAR DE STORY FINAL (FOTO OU GRAVAÇÃO DE VÍDEO COMPLETA) ---
+        // --- EXPORTAR STORY COM MIXER PROFISSIONAL DE ÁUDIOS ---
         function exportMedia() {
+            // Se houver qualquer trilha ativa ou vídeo, exportamos como vídeo renderizado
             const needsVideo = (mediaFile.type === 'video' || activeAnimationEffect !== 'none' || audioTracks.length > 0);
             
             if (needsVideo) {
@@ -2600,7 +2332,7 @@
 
         async function exportAsVideo() {
             if (!('MediaRecorder' in window)) {
-                showToast("Gravação de vídeo não suportada neste navegador. Baixando como imagem.", true);
+                showToast("Seu navegador não suporta exportação nativa em vídeo. Baixando como imagem.", true);
                 exportAsImage();
                 return;
             }
@@ -2622,40 +2354,47 @@
             let streamDest;
 
             try {
-                // Se houver áudio, mistura todas as faixas respeitando os volumes individuais configurados
+                // Se houver faixas de áudio no projeto, vamos inicializar um Mixer profissional usando a Web Audio API
                 if (audioTracks.length > 0) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     streamDest = audioCtx.createMediaStreamDestination();
                     
                     audioTracks.forEach(track => {
-                        if (track.src) {
-                            track.src.currentTime = 0;
-                            track.src.muted = false;
+                        // Resetar os tempos de reprodução
+                        track.src.currentTime = track.startTime;
+                        track.src.muted = false;
 
-                            const audioSource = audioCtx.createMediaElementSource(track.src);
-                            const gainNode = audioCtx.createGain();
-                            
-                            gainNode.gain.setValueAtTime(track.volume, audioCtx.currentTime);
-                            
-                            audioSource.connect(gainNode);
-                            gainNode.connect(streamDest);
-                            gainNode.connect(audioCtx.destination);
-                        }
+                        // Criar nós de áudio e conectar ao destino da stream de vídeo
+                        const sourceNode = audioCtx.createMediaElementSource(track.src);
+                        const gainNode = audioCtx.createGain();
+                        
+                        gainNode.gain.setValueAtTime(track.volume, audioCtx.currentTime);
+                        
+                        sourceNode.connect(gainNode);
+                        gainNode.connect(streamDest);
+                        gainNode.connect(audioCtx.destination); // escutar em tempo real
                     });
 
-                    const mixedAudioTracks = streamDest.stream.getAudioTracks();
-                    if (mixedAudioTracks.length > 0) {
-                        tracks.push(mixedAudioTracks[0]);
+                    const audioTracksFromDest = streamDest.stream.getAudioTracks();
+                    if (audioTracksFromDest.length > 0) {
+                        tracks.push(audioTracksFromDest[0]);
                     }
                 }
 
                 const combinedStream = new MediaStream(tracks);
                 
-                const options = { mimeType: 'video/webm;codecs=vp9' };
+                // Opções de gravação adaptadas para dispositivos móveis
+                let options = { mimeType: 'video/webm;codecs=vp9' };
                 try {
                     mediaRecorder = new MediaRecorder(combinedStream, options);
                 } catch(e) {
-                    mediaRecorder = new MediaRecorder(combinedStream);
+                    try {
+                        options = { mimeType: 'video/webm' };
+                        mediaRecorder = new MediaRecorder(combinedStream, options);
+                    } catch(err2) {
+                        // Fallback absoluto para Safari/iOS
+                        mediaRecorder = new MediaRecorder(combinedStream);
+                    }
                 }
 
                 mediaRecorder.ondataavailable = (e) => {
@@ -2673,11 +2412,10 @@
                     a.click();
                     document.body.removeChild(a);
 
-                    audioTracks.forEach(track => {
-                        if (track.src) {
-                            track.src.pause();
-                            track.src.currentTime = 0;
-                        }
+                    // Pausar todos
+                    audioTracks.forEach(t => {
+                        t.src.pause();
+                        t.src.currentTime = t.startTime;
                     });
 
                     if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
@@ -2686,31 +2424,28 @@
                     }
 
                     exportModal.classList.add('hidden');
-                    showToast("Vídeo exportado e salvo!");
+                    showToast("Vídeo de Story exportado e salvo com sucesso!");
                 };
 
                 mediaRecorder.start();
                 isPlaying = true;
                 
+                // Dar play em todos os canais de áudio
                 audioTracks.forEach(track => {
-                    if (track.src) {
-                        track.src.volume = track.volume;
-                        track.src.play().catch(()=>{});
-                    }
+                    track.src.play().catch(()=>{});
                 });
 
                 if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                     mediaFile.src.play().catch(()=>{});
                 }
 
-                // Duração dinâmica da gravação de acordo com o slider de tempo escolhido
                 const recordDuration = animationDuration * 1000;
                 let elapsed = 0;
                 const progressInterval = setInterval(() => {
                     elapsed += 250;
                     const percent = Math.min((elapsed / recordDuration) * 100, 100);
                     exportProgressBar.style.width = `${percent}%`;
-                    exportProgressText.innerText = `Processando: ${Math.floor(percent)}%`;
+                    exportProgressText.innerText = `Gravando mixer: ${Math.floor(percent)}%`;
 
                     if (elapsed >= recordDuration) {
                         clearInterval(progressInterval);
@@ -2723,11 +2458,11 @@
             } catch (err) {
                 console.error("Erro na gravação: ", err);
                 exportModal.classList.add('hidden');
-                showToast("Erro ao processar as trilhas no mixador de exportação.", true);
+                showToast("Erro ao processar as faixas de áudio na gravação.", true);
             }
         }
 
-        // --- FEEDBACKS EM TOASTS ---
+        // --- TOASTS FEEDBACK ---
         function showToast(message, isError = false) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -2751,11 +2486,11 @@
             }, 3000);
         }
 
-        // --- SUPORTE COMPLETO A PWA OFFLINE ---
+        // --- REGISTRO DO SERVICE WORKER (PWA) ---
         function registerStoryPWA() {
             if ('serviceWorker' in navigator) {
                 const swCode = `
-                    const CACHE_NAME = 'storycraft-v1';
+                    const CACHE_NAME = 'storycraft-pro-v2';
                     const ASSETS = [
                         '/',
                         window.location.href
@@ -2782,8 +2517,8 @@
                 const swUrl = URL.createObjectURL(blob);
                 
                 navigator.serviceWorker.register(swUrl)
-                    .then(() => console.log("PWA Service Worker registrado com sucesso!"))
-                    .catch(err => console.warn("Falha ao registrar Service Worker do PWA", err));
+                    .then(() => console.log("Service Worker do PWA registrado!"))
+                    .catch(err => console.warn("Erro no registro do SW do PWA", err));
             }
 
             let deferredPrompt;
@@ -2797,7 +2532,7 @@
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then((choiceResult) => {
                         if (choiceResult.outcome === 'accepted') {
-                            showToast("StoryCraft Studio Installed!");
+                            showToast("StoryCraft Studio Pro Instalado!");
                             pwaBtn.classList.add('hidden');
                         }
                         deferredPrompt = null;
