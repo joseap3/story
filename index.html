@@ -9,7 +9,7 @@
     <!-- Lucide Icons para interface moderna -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&family=Bangers&family=Cinzel:wght=700&family=Creepster&family=Press+Start+2P&family=Shrikhand&family=Pacifico&family=Anton&family=Special+Elite&family=Dancing+Script&family=Rubik+Mono+One&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Bangers&family=Cinzel:wght@700&family=Creepster&family=Press+Start+2P&family=Shrikhand&family=Pacifico&family=Anton&family=Special+Elite&family=Dancing+Script&family=Rubik+Mono+One&display=swap');
         
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -253,7 +253,7 @@
                     <!-- Auxílio de Gestos no Canvas -->
                     <div class="p-2.5 bg-zinc-950/60 border border-zinc-800/80 rounded-xl text-center">
                         <p class="text-[11px] text-purple-300 flex items-center justify-center gap-1">
-                            <i data-lucide="pointer" class="w-3.5 h-3.5"></i> Dica: Arraste e redimensione os textos diretamente no Story!
+                            <i data-lucide="pointer" class="w-3.5 h-3.5"></i> Dica: Arraste os elementos no Story ou utilize os Sliders abaixo de cada caixa.
                         </p>
                     </div>
 
@@ -530,8 +530,6 @@
         let dragOffsetX = 0;
         let dragOffsetY = 0;
         let resizeStartWidth = 0;
-        let resizeStartHeight = 0;
-        let touchStartDist = 0;
 
         // Configurações de Fontes do StoryCraft Pro
         const fontsAvailable = [
@@ -615,7 +613,7 @@
                 {
                     id: 'default-subtitle',
                     type: 'text',
-                    text: 'Mixagem de Som, Edição de Faixas e Preview em Tempo Real!',
+                    text: 'Controle de som, mixagem e sliders precisos na barra lateral!',
                     x: defaultWidth / 2,
                     y: defaultHeight / 2 + 50,
                     fontSize: 40,
@@ -645,6 +643,18 @@
             updateTextListUI();
         }
 
+        // --- PREVIEW DO CELULAR (ABRIR E FECHAR) ---
+        function openPhonePreview() {
+            isPhonePreviewActive = true;
+            document.getElementById('phonePreviewModal').classList.remove('hidden');
+            showToast("Visualização realista ativa!");
+        }
+
+        function closePhonePreview() {
+            isPhonePreviewActive = false;
+            document.getElementById('phonePreviewModal').classList.add('hidden');
+        }
+
         // --- NAVEGAÇÃO DE ABAS ---
         function switchTab(tabId) {
             document.getElementById(`tabContent-${activeTab}`).classList.add('hidden');
@@ -656,7 +666,7 @@
             activeTab = tabId;
         }
 
-        // --- SISTEMA DE PRESETS EM 1-CLIQUE ---
+        // --- PRESETS TEMÁTICOS ---
         function applyPreset(presetType) {
             if (presetType === 'retro') {
                 mediaFile = { type: 'color', color: '#09090b', scale: 1, yOffset: 0 };
@@ -748,10 +758,10 @@
             }
             selectedTextId = textLayers[0]?.id || null;
             updateTextListUI();
-            showToast(`Preset "${presetType}" aplicado com sucesso!`);
+            showToast(`Preset "${presetType}" aplicado!`);
         }
 
-        // --- CONFIGURAÇÃO DE INTERAÇÃO DIRETA NO CANVAS (ARRASAR / REDIMENSIONAR) ---
+        // --- ARRASTAR E REDIMENSIONAR NO CANVAS ---
         function setupCanvasInteractions() {
             const handleStart = (clientX, clientY) => {
                 const rect = canvas.getBoundingClientRect();
@@ -760,17 +770,13 @@
                 const canvasX = (clientX - rect.left) * scaleX;
                 const canvasY = (clientY - rect.top) * scaleY;
 
-                // Checar se clicou em algum elemento (de trás para frente para pegar o que está por cima)
                 for (let i = textLayers.length - 1; i >= 0; i--) {
                     const el = textLayers[i];
-                    
-                    // Estimativa rápida do retângulo físico do elemento baseado no enquadramento
                     const h = el.fontSize * 1.5;
                     const w = el.width || 600;
                     const elX = el.x - w / 2;
                     const elY = el.y - h / 2;
 
-                    // Checar região de Redimensionamento (Canto inferior direito da caixa)
                     const resizeZoneRadius = 50; 
                     const cornerX = el.x + w / 2;
                     const cornerY = el.y + h / 2;
@@ -785,7 +791,6 @@
                         return;
                     }
 
-                    // Checar região de arraste normal
                     if (canvasX >= elX && canvasX <= elX + w && canvasY >= elY && canvasY <= elY + h) {
                         dragTarget = el;
                         isResizing = false;
@@ -808,19 +813,20 @@
                 const canvasY = (clientY - rect.top) * scaleY;
 
                 if (isResizing) {
-                    // Mudar a largura baseada na distância do centro do elemento
                     const currentDistX = Math.abs(canvasX - dragTarget.x) * 2;
                     dragTarget.width = Math.max(150, Math.min(1000, currentDistX));
-                    // Opcional: ajustar dinamicamente o tamanho da fonte junto com a caixa
-                    if (dragTarget.width < resizeStartWidth * 0.8) {
-                        dragTarget.fontSize = Math.max(15, dragTarget.fontSize - 0.5);
-                    } else if (dragTarget.width > resizeStartWidth * 1.2) {
-                        dragTarget.fontSize = Math.min(120, dragTarget.fontSize + 0.5);
-                    }
                 } else {
                     dragTarget.x = Math.max(0, Math.min(defaultWidth, canvasX - dragOffsetX));
                     dragTarget.y = Math.max(0, Math.min(defaultHeight, canvasY - dragOffsetY));
                 }
+                
+                // Força a atualização dos sliders na barra lateral enquanto arrasta
+                const sliderX = document.getElementById(`slider-x-${dragTarget.id}`);
+                const sliderY = document.getElementById(`slider-y-${dragTarget.id}`);
+                const sliderW = document.getElementById(`slider-w-${dragTarget.id}`);
+                if (sliderX) sliderX.value = Math.floor(dragTarget.x);
+                if (sliderY) sliderY.value = Math.floor(dragTarget.y);
+                if (sliderW && dragTarget.width) sliderW.value = Math.floor(dragTarget.width);
             };
 
             const handleEnd = () => {
@@ -828,12 +834,10 @@
                 isResizing = false;
             };
 
-            // Eventos do Mouse
             canvas.addEventListener('mousedown', (e) => handleStart(e.clientX, e.clientY));
             window.addEventListener('mousemove', (e) => handleMove(e.clientX, e.clientY));
             window.addEventListener('mouseup', handleEnd);
 
-            // Eventos de Toque (Celular) com preventDefault seguro
             canvas.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 1) {
                     handleStart(e.touches[0].clientX, e.touches[0].clientY);
@@ -849,7 +853,7 @@
             canvas.addEventListener('touchend', handleEnd);
         }
 
-        // --- GERENCIAMENTO DE MÍDIA (UPLOAD) ---
+        // --- UPLOAD E CONTROLE DE MÍDIA DE FUNDO ---
         function handleMediaUpload(input, type) {
             const file = input.files[0];
             if (!file) return;
@@ -886,7 +890,7 @@
                         video.play();
                         isPlaying = true;
                         updateAudioPlaybackUI();
-                        showToast("Vídeo de fundo carregado!");
+                        showToast("Vídeo carregado!");
                     };
                 }
             };
@@ -910,11 +914,38 @@
             if (mediaFile) mediaFile.yOffset = parseInt(value);
         }
 
-        // --- DURAÇÃO DO STORY ---
         function updateStoryDuration(val) {
             animationDuration = parseInt(val);
             document.getElementById('storyDurationVal').innerText = `${animationDuration}s`;
             document.getElementById('storyDurationSlider').value = animationDuration;
+        }
+
+        // --- EXCLUSIVO ALGORITMO DE QUEBRA DE LINHAS (WORD WRAP) ---
+        function getWrappedLines(targetCtx, text, maxWidth, fontStr) {
+            targetCtx.save();
+            targetCtx.font = fontStr;
+            const paragraphs = text.split('\n');
+            const allLines = [];
+
+            paragraphs.forEach(para => {
+                const words = para.split(' ');
+                let currentLine = '';
+
+                for (let n = 0; n < words.length; n++) {
+                    const testLine = currentLine + words[n] + ' ';
+                    const metrics = targetCtx.measureText(testLine);
+                    if (metrics.width > maxWidth && n > 0) {
+                        allLines.push(currentLine.trim());
+                        currentLine = words[n] + ' ';
+                    } else {
+                        currentLine = testLine;
+                    }
+                }
+                allLines.push(currentLine.trim());
+            });
+
+            targetCtx.restore();
+            return allLines;
         }
 
         function toggleAutoSync(checked) {
@@ -935,11 +966,11 @@
             if (maxAudioDuration > 0) {
                 const safeDuration = Math.min(60, Math.max(5, Math.ceil(maxAudioDuration)));
                 updateStoryDuration(safeDuration);
-                showToast(`Vídeo sincronizado para ${safeDuration} segundos.`);
+                showToast(`Vídeo sincronizado para ${safeDuration}s.`);
             }
         }
 
-        // --- BIBLIOTECA DE FIGURINHAS (STICKERS/EMOJIS/FORMAS) ---
+        // --- SELETOR DE STICKERS E ELEMENTOS VETORIAIS ---
         function openStickersPanel() {
             document.getElementById('stickersModal').classList.remove('hidden');
         }
@@ -985,7 +1016,7 @@
             showToast("Forma decorativa adicionada!");
         }
 
-        // --- SISTEMA DE TEXTO E ELEMENTOS ---
+        // --- SISTEMA DE TEXTOS E CONTROLES (SLIDERS) ---
         function addNewText() {
             const newText = {
                 id: 'text-' + Date.now(),
@@ -1083,6 +1114,33 @@
                             </div>
                         </div>
 
+                        <!-- SLIDERS DE PRECISÃO PARA TEXTO -->
+                        <div class="space-y-2 border-t border-zinc-800/80 pt-2.5">
+                            <span class="text-[10px] text-purple-400 font-bold block uppercase tracking-wider">🎛️ Controles de Precisão</span>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block">Posição Horiz. (X)</span>
+                                    <input id="slider-x-${layer.id}" type="range" min="0" max="1080" value="${layer.x}" oninput="updateTextProperty('${layer.id}', 'x', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block">Posição Vert. (Y)</span>
+                                    <input id="slider-y-${layer.id}" type="range" min="0" max="1920" value="${layer.y}" oninput="updateTextProperty('${layer.id}', 'y', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block">Largura da Caixa</span>
+                                    <input id="slider-w-${layer.id}" type="range" min="150" max="1080" value="${layer.width}" oninput="updateTextProperty('${layer.id}', 'width', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block">Tamanho da Letra</span>
+                                    <input type="range" min="10" max="200" value="${layer.fontSize}" oninput="updateTextProperty('${layer.id}', 'fontSize', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex items-center gap-4 pt-1">
                             <label class="flex items-center gap-1.5 text-xs text-zinc-400 cursor-pointer">
                                 <input type="checkbox" ${layer.bold ? 'checked' : ''} onchange="updateTextProperty('${layer.id}', 'bold', this.checked)" class="accent-purple-500 rounded">
@@ -1102,11 +1160,23 @@
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl">${layer.text}</span>
-                            <div class="flex-1">
-                                <span class="text-[10px] text-zinc-500">Tamanho</span>
-                                <input type="range" min="40" max="300" value="${layer.fontSize}" oninput="updateTextProperty('${layer.id}', 'fontSize', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                        <div class="flex items-center gap-4">
+                            <span class="text-4xl shrink-0 select-none">${layer.text}</span>
+                            <div class="flex-1 space-y-2">
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block">Tamanho Figuração</span>
+                                    <input type="range" min="40" max="400" value="${layer.fontSize}" oninput="updateTextProperty('${layer.id}', 'fontSize', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="text-[9px] text-zinc-500 block">Posição X</span>
+                                        <input id="slider-x-${layer.id}" type="range" min="0" max="1080" value="${layer.x}" oninput="updateTextProperty('${layer.id}', 'x', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                    </div>
+                                    <div>
+                                        <span class="text-[9px] text-zinc-500 block">Posição Y</span>
+                                        <input id="slider-y-${layer.id}" type="range" min="0" max="1920" value="${layer.y}" oninput="updateTextProperty('${layer.id}', 'y', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1118,14 +1188,27 @@
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <span class="text-[10px] text-zinc-500 block mb-1">Cor</span>
-                                <input type="color" value="${layer.color}" oninput="updateTextProperty('${layer.id}', 'color', this.value)" class="w-full bg-transparent border border-zinc-800 rounded cursor-pointer h-8">
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block mb-1">Cor da Forma</span>
+                                    <input type="color" value="${layer.color}" oninput="updateTextProperty('${layer.id}', 'color', this.value)" class="w-full bg-transparent border border-zinc-800 rounded cursor-pointer h-8">
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block">Largura / Escala</span>
+                                    <input id="slider-w-${layer.id}" type="range" min="10" max="800" value="${layer.width}" oninput="updateTextProperty('${layer.id}', 'width', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                                </div>
                             </div>
-                            <div>
-                                <span class="text-[10px] text-zinc-500 block mb-1">Largura</span>
-                                <input type="range" min="10" max="800" value="${layer.width}" oninput="updateTextProperty('${layer.id}', 'width', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1.5">
+                            
+                            <div class="grid grid-cols-2 gap-2 border-t border-zinc-800/60 pt-2">
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block">Posição X</span>
+                                    <input id="slider-x-${layer.id}" type="range" min="0" max="1080" value="${layer.x}" oninput="updateTextProperty('${layer.id}', 'x', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-zinc-500 block">Posição Y</span>
+                                    <input id="slider-y-${layer.id}" type="range" min="0" max="1920" value="${layer.y}" oninput="updateTextProperty('${layer.id}', 'y', parseInt(this.value))" class="w-full accent-purple-500 bg-zinc-800 rounded-lg h-1">
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1167,34 +1250,6 @@
             showToast("Elemento removido.");
         }
 
-        // --- ALGORITMO DE QUEBRA DE LINHAS (WORD WRAP) ---
-        function getWrappedLines(targetCtx, text, maxWidth, fontStr) {
-            targetCtx.save();
-            targetCtx.font = fontStr;
-            const paragraphs = text.split('\n');
-            const allLines = [];
-
-            paragraphs.forEach(para => {
-                const words = para.split(' ');
-                let currentLine = '';
-
-                for (let n = 0; n < words.length; n++) {
-                    const testLine = currentLine + words[n] + ' ';
-                    const metrics = targetCtx.measureText(testLine);
-                    if (metrics.width > maxWidth && n > 0) {
-                        allLines.push(currentLine.trim());
-                        currentLine = words[n] + ' ';
-                    } else {
-                        currentLine = testLine;
-                    }
-                }
-                allLines.push(currentLine.trim());
-            });
-
-            targetCtx.restore();
-            return allLines;
-        }
-
         // --- FILTROS DE COR ---
         function setFilter(filterName) {
             selectedFilter = filterName;
@@ -1207,7 +1262,7 @@
             showToast(`Efeito dinâmico "${effectName}" carregado.`);
         }
 
-        // --- SISTEMA AVANÇADO DE ÁUDIO (CORTAR & MIXAR MULTICANAIS) ---
+        // --- SISTEMA DE MIXAGEM E EDIÇÃO DE ÁUDIO ---
         function addAudioTrack(input) {
             const file = input.files[0];
             if (!file) return;
@@ -1215,7 +1270,7 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const audio = new Audio(e.target.result);
-                audio.loop = false; // desativado o loop direto do elemento para gerenciar via código
+                audio.loop = false;
                 
                 audio.onloadedmetadata = function() {
                     const track = {
@@ -1260,7 +1315,7 @@
                         <button onclick="removeAudioTrack('${track.id}')" class="text-red-400 hover:text-red-300 text-[10px] font-bold">Excluir</button>
                     </div>
 
-                    <!-- Gráfico De Ondas Estilizado / Timeline do corte -->
+                    <!-- Ponto de Corte -->
                     <div class="bg-zinc-900/60 p-2 rounded-lg border border-zinc-850 space-y-1.5">
                         <div class="flex items-center justify-between text-[9px] text-zinc-500">
                             <span>🕒 Cortar Áudio (Original: ${Math.floor(track.duration)}s)</span>
@@ -1279,7 +1334,7 @@
                         </div>
                     </div>
 
-                    <!-- Volume da Faixa -->
+                    <!-- Volume -->
                     <div>
                         <div class="flex justify-between items-center text-[9px] text-zinc-500 mb-1">
                             <span>🔊 Volume da Faixa</span>
@@ -1323,10 +1378,10 @@
             audioTracks = audioTracks.filter(t => t.id !== trackId);
             updateAudioTracksUI();
             syncDurationWithAudio();
-            showToast("Faixa de áudio excluída.");
+            showToast("Faixa removida.");
         }
 
-        // --- ESTÚDIO DE GRAVAÇÃO DE VOZ (LOCUÇÃO) ---
+        // --- GRAVAÇÃO DE VOZ / LOCUÇÃO ---
         function toggleVoiceoverRecording() {
             if (isRecordingVoice) {
                 stopVoiceoverRecording();
@@ -1337,7 +1392,7 @@
 
         async function startVoiceoverRecording() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                showToast("Seu navegador não suporta gravação de voz.", true);
+                showToast("Seu dispositivo não suporta gravação.", true);
                 return;
             }
 
@@ -1347,9 +1402,7 @@
                 voiceChunks = [];
 
                 mediaRecorderVoice.ondataavailable = (e) => {
-                    if (e.data.size > 0) {
-                        voiceChunks.push(e.data);
-                    }
+                    if (e.data.size > 0) voiceChunks.push(e.data);
                 };
 
                 mediaRecorderVoice.onstop = () => {
@@ -1363,7 +1416,7 @@
                             const track = {
                                 id: 'audio-voice-' + Date.now(),
                                 src: audio,
-                                name: "🎤 Locução Voz " + new Date().toLocaleTimeString(),
+                                name: "🎤 Gravação de Voz",
                                 volume: 0.9,
                                 startTime: 0,
                                 endTime: audio.duration,
@@ -1373,7 +1426,7 @@
                             audioTracks.push(track);
                             updateAudioTracksUI();
                             syncDurationWithAudio();
-                            showToast("Locução adicionada ao mixer!");
+                            showToast("Voz adicionada ao mixer!");
                         };
                     };
                     reader.readAsDataURL(blob);
@@ -1382,7 +1435,6 @@
                 mediaRecorderVoice.start();
                 isRecordingVoice = true;
 
-                // Animação de gravação no botão
                 const btn = document.getElementById('voiceoverBtn');
                 btn.classList.add('border-red-500', 'bg-red-950/20', 'animate-pulse');
                 document.getElementById('voiceoverBtnText').innerText = "Parar Gravação";
@@ -1390,15 +1442,14 @@
                 showToast("Gravando voz...");
 
             } catch (err) {
-                console.error("Erro ao acessar microfone: ", err);
-                showToast("Permissão negada para o microfone.", true);
+                console.error(err);
+                showToast("Falha ao abrir microfone.", true);
             }
         }
 
         function stopVoiceoverRecording() {
             if (mediaRecorderVoice && isRecordingVoice) {
                 mediaRecorderVoice.stop();
-                // Parar todos os tracks do stream para fechar o microfone fisicamente
                 mediaRecorderVoice.stream.getTracks().forEach(track => track.stop());
                 isRecordingVoice = false;
 
@@ -1409,32 +1460,23 @@
             }
         }
 
-        // --- REPRODUÇÃO & PLAYBACK GERAL ---
+        // --- PLAYBACK SYNC ---
         function togglePlayback() {
             isPlaying = !isPlaying;
             const playIcon = document.getElementById('playIcon');
             
             if (isPlaying) {
                 playIcon.setAttribute('data-lucide', 'pause');
-                
-                // Dar play no vídeo de fundo
                 if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                     mediaFile.src.play().catch(()=>{});
                 }
-
-                // Iniciar sincronizado todos os canais de áudio baseado no tempo de reprodução atual
                 playAllAudioTracksSnyced();
             } else {
                 playIcon.setAttribute('data-lucide', 'play');
-                
                 if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                     mediaFile.src.pause();
                 }
-
-                // Pausar todos os canais de áudio
-                audioTracks.forEach(track => {
-                    track.src.pause();
-                });
+                audioTracks.forEach(t => t.src.pause());
             }
             initLucide();
         }
@@ -1462,7 +1504,7 @@
             initLucide();
         }
 
-        // --- LOOP DE RENDERIZAÇÃO PRINCIPAL DO CANVAS ---
+        // --- RENDER LOOP DO CANVAS ---
         function renderLoop(timestamp) {
             if (!lastFrameTime) lastFrameTime = timestamp;
             const delta = (timestamp - lastFrameTime) / 1000;
@@ -1471,23 +1513,20 @@
             if (isPlaying) {
                 currentTime += delta;
                 
-                // Lidar com o loop seguro da duração total do Story
                 if (currentTime >= animationDuration) {
                     currentTime = 0;
-                    // Resetar audios e fundos de volta ao início
                     if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                         mediaFile.src.currentTime = 0;
                     }
                     playAllAudioTracksSnyced();
                 }
 
-                // Verificar corte individual de áudio para pausar/tocar no tempo certo se necessário
+                // Sincronizar limites de tempo do áudio
                 audioTracks.forEach(track => {
                     const relativeAudioTime = track.startTime + currentTime;
                     if (relativeAudioTime >= track.endTime) {
                         track.src.pause();
                     } else if (track.src.paused) {
-                        // Se o áudio deveria estar tocando mas foi pausado pelo limite, tocar novamente
                         track.src.currentTime = relativeAudioTime;
                         track.src.play().catch(()=>{});
                     }
@@ -1501,28 +1540,20 @@
             };
             document.getElementById('videoDurationText').innerText = `${formatTime(currentTime)} / ${formatTime(animationDuration)}`;
 
-            // Limpa canvas principal
             ctx.clearRect(0, 0, defaultWidth, defaultHeight);
 
-            // 1. Desenhar Fundo
+            // Fundo -> Filtros -> Partículas -> Elementos de Texto/Formas
             drawBackground(ctx);
-
-            // 2. Aplicar Filtros Gerais
             applyColorFilters(ctx);
-
-            // 3. Desenhar Efeitos de Partícula
             drawOverlayEffects(ctx, delta);
-
-            // 4. Desenhar Textos com quebra automática (e guias se ativo)
             drawTexts(ctx, true);
 
-            // Se o preview simulado estiver ativo, desenha idêntico nele (sem as caixas pontilhadas guias)
             if (isPhonePreviewActive) {
                 previewCtx.clearRect(0, 0, defaultWidth, defaultHeight);
                 drawBackground(previewCtx);
                 applyColorFilters(previewCtx);
                 drawOverlayEffects(previewCtx, delta);
-                drawTexts(previewCtx, false); // false para ocultar as caixas guia
+                drawTexts(previewCtx, false); // Não desenhar marcações de edição no preview do celular
             }
 
             requestAnimationFrame(renderLoop);
@@ -1780,7 +1811,7 @@
                 targetCtx.lineWidth = 1.5;
                 particles.forEach((p, index) => {
                     p.y += p.speed * delta;
-                    p.x += 100 * delta; // leve vento diagonal
+                    p.x += 100 * delta;
 
                     if (p.y > defaultHeight) {
                         particles[index] = {
@@ -1874,7 +1905,7 @@
 
                     targetCtx.restore();
 
-                    // Caixa de edição pontilhada temporária (não entra no preview real de smartphone)
+                    // Auxílio pontilhado de redimensionamento e centro
                     if (showGuides && selectedTextId === layer.id && !isPhonePreviewActive) {
                         targetCtx.save();
                         targetCtx.translate(layer.x, animatedY);
@@ -1894,8 +1925,8 @@
                             totalHeight + (padding * 2)
                         );
 
-                        // Botão de Redimensionamento Visual
-                        targetCtx.fillStyle = '#10b981'; // verde esmeralda
+                        // Botão de Redimensionamento Visual no canto inferior direito
+                        targetCtx.fillStyle = '#10b981';
                         targetCtx.beginPath();
                         targetCtx.arc(boxWidth / 2 + padding, totalHeight / 2 + padding, 18, 0, Math.PI * 2);
                         targetCtx.fill();
@@ -1924,7 +1955,6 @@
                         const pad = layer.fontSize * 0.6;
                         targetCtx.strokeRect(-pad, -pad, pad * 2, pad * 2);
 
-                        // Botão de Redimensionamento Visual
                         targetCtx.fillStyle = '#10b981';
                         targetCtx.beginPath();
                         targetCtx.arc(pad, pad, 15, 0, Math.PI * 2);
@@ -1945,7 +1975,6 @@
                     } else if (layer.shape === 'square') {
                         targetCtx.fillRect(-w / 2, -h / 2, w, h);
                     } else if (layer.shape === 'badge') {
-                        // Estrela/Crachá estilizada de 8 pontas
                         targetCtx.beginPath();
                         for (let k = 0; k < 8; k++) {
                             const angle = (Math.PI / 4) * k;
@@ -1972,7 +2001,6 @@
                         targetCtx.setLineDash([10, 8]);
                         targetCtx.strokeRect(-w/2 - 10, -h/2 - 10, w + 20, h + 20);
 
-                        // Botão de Redimensionamento Visual
                         targetCtx.fillStyle = '#10b981';
                         targetCtx.beginPath();
                         targetCtx.arc(w/2 + 10, h/2 + 10, 15, 0, Math.PI * 2);
@@ -1984,7 +2012,7 @@
             });
         }
 
-        // --- SISTEMA DE SALVAMENTO DE PROJETOS E BACKUP (IndexedDB) ---
+        // --- SALVAR PROJETOS LOCALMENTE (INDEXEDDB) ---
         function saveCurrentToProjects() {
             if (!db) {
                 showToast("Erro: Banco de dados local indisponível.", true);
@@ -2021,7 +2049,7 @@
             const request = store.put(projectData);
 
             request.onsuccess = () => {
-                showToast("Projeto salvo localmente no banco de dados!");
+                showToast("Projeto salvo localmente!");
                 loadProjectList();
             };
 
@@ -2124,7 +2152,6 @@
                 document.getElementById('storyDurationVal').innerText = `${animationDuration}s`;
                 document.getElementById('autoSyncDuration').checked = autoSyncEnabled;
 
-                // Restaurar canais de áudio
                 audioTracks.forEach(t => t.src.pause());
                 audioTracks = [];
 
@@ -2147,7 +2174,7 @@
 
                 updateAudioTracksUI();
                 updateTextListUI();
-                showToast("Rascunho restaurado com sucesso!");
+                showToast("Story restaurado!");
                 isPlaying = false;
                 updateAudioPlaybackUI();
             };
@@ -2159,12 +2186,12 @@
             const request = store.delete(projectId);
 
             request.onsuccess = () => {
-                showToast("Rascunho removido.");
+                showToast("Rascunho excluído.");
                 loadProjectList();
             };
         }
 
-        // --- SISTEMA DE BACKUP GERAL (EXPORTAR/IMPORTAR ARQUIVO JSON) ---
+        // --- BACKUP INTERNO (EXPORTE E IMPORTE DE JSON) ---
         function openBackupModal() {
             document.getElementById('backupModal').classList.remove('hidden');
         }
@@ -2211,7 +2238,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast("Backup baixado com sucesso!");
+            showToast("Backup baixado!");
         }
 
         function uploadBackupFile(input) {
@@ -2223,7 +2250,7 @@
                 try {
                     const payload = JSON.parse(e.target.result);
                     if (payload.appName !== "StoryCraft Studio Backup") {
-                        showToast("Arquivo de backup inválido ou incompatível.", true);
+                        showToast("Arquivo de backup inválido.", true);
                         return;
                     }
 
@@ -2297,32 +2324,19 @@
                     updateAudioTracksUI();
                     updateTextListUI();
                     closeBackupModal();
-                    showToast("Área de trabalho restaurada com sucesso!");
+                    showToast("Área restaurada com sucesso!");
                     isPlaying = false;
                     updateAudioPlaybackUI();
                 } catch(err) {
                     console.error(err);
-                    showToast("Falha ao ler arquivo de backup.", true);
+                    showToast("Erro ao importar rascunho.", true);
                 }
             };
             reader.readAsText(file);
         }
 
-        // --- SIMULADOR DE CELULAR (PREVIEW) ---
-        function openPhonePreview() {
-            isPhonePreviewActive = true;
-            document.getElementById('phonePreviewModal').classList.remove('hidden');
-            showToast("Simulador de Celular ativado!");
-        }
-
-        function closePhonePreview() {
-            isPhonePreviewActive = false;
-            document.getElementById('phonePreviewModal').classList.add('hidden');
-        }
-
-        // --- EXPORTAR STORY COM MIXER ---
+        // --- EXPORTAÇÃO DINÂMICA COMPLETA (FOTO OU GRAVAÇÃO DE VIDEO) ---
         function exportMedia() {
-            // Se houver qualquer trilha ativa ou vídeo, exportamos como vídeo renderizado
             const needsVideo = (mediaFile.type === 'video' || activeAnimationEffect !== 'none' || audioTracks.length > 0);
             
             if (needsVideo) {
@@ -2340,12 +2354,12 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            showToast("Foto de Story salva com sucesso!");
+            showToast("Foto do Story salva!");
         }
 
         async function exportAsVideo() {
             if (!('MediaRecorder' in window)) {
-                showToast("Seu navegador não suporta exportação nativa em vídeo. Baixando como imagem.", true);
+                showToast("Seu dispositivo não suporta renderização local de vídeo. Salvando como imagem.", true);
                 exportAsImage();
                 return;
             }
@@ -2365,27 +2379,28 @@
             let chunks = [];
             let audioCtx;
             let streamDest;
+            let tempAudios = []; // Armazenamento temporário de novas instâncias de Audio limpas para evitar erros de nó conectado
 
             try {
-                // Se houver faixas de áudio no projeto, vamos inicializar um Mixer profissional usando a Web Audio API
                 if (audioTracks.length > 0) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     streamDest = audioCtx.createMediaStreamDestination();
                     
                     audioTracks.forEach(track => {
-                        // Resetar os tempos de reprodução
-                        track.src.currentTime = track.startTime;
-                        track.src.muted = false;
+                        // Instanciamos uma versão nova do áudio para não conflitar com conexões Web Audio ativas do workspace
+                        const tempAudio = new Audio(track.originalData);
+                        tempAudio.currentTime = track.startTime;
+                        tempAudio.volume = track.volume;
+                        tempAudio.muted = false;
+                        tempAudios.push({ audio: tempAudio, start: track.startTime, end: track.endTime });
 
-                        // Criar nós de áudio e conectar ao destino da stream de vídeo
-                        const sourceNode = audioCtx.createMediaElementSource(track.src);
+                        const sourceNode = audioCtx.createMediaElementSource(tempAudio);
                         const gainNode = audioCtx.createGain();
-                        
                         gainNode.gain.setValueAtTime(track.volume, audioCtx.currentTime);
                         
                         sourceNode.connect(gainNode);
                         gainNode.connect(streamDest);
-                        gainNode.connect(audioCtx.destination); // escutar em tempo real
+                        gainNode.connect(audioCtx.destination);
                     });
 
                     const audioTracksFromDest = streamDest.stream.getAudioTracks();
@@ -2396,7 +2411,6 @@
 
                 const combinedStream = new MediaStream(tracks);
                 
-                // Opções de gravação adaptadas para dispositivos móveis
                 let options = { mimeType: 'video/webm;codecs=vp9' };
                 try {
                     mediaRecorder = new MediaRecorder(combinedStream, options);
@@ -2405,7 +2419,6 @@
                         options = { mimeType: 'video/webm' };
                         mediaRecorder = new MediaRecorder(combinedStream, options);
                     } catch(err2) {
-                        // Fallback absoluto para Safari/iOS
                         mediaRecorder = new MediaRecorder(combinedStream);
                     }
                 }
@@ -2425,11 +2438,8 @@
                     a.click();
                     document.body.removeChild(a);
 
-                    // Pausar todos
-                    audioTracks.forEach(t => {
-                        t.src.pause();
-                        t.src.currentTime = t.startTime;
-                    });
+                    // Desligar os áudios temporários
+                    tempAudios.forEach(item => item.audio.pause());
 
                     if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
                         mediaFile.src.pause();
@@ -2437,15 +2447,15 @@
                     }
 
                     exportModal.classList.add('hidden');
-                    showToast("Vídeo de Story exportado e salvo com sucesso!");
+                    showToast("Story exportado com sucesso!");
                 };
 
                 mediaRecorder.start();
                 isPlaying = true;
                 
-                // Dar play em todos os canais de áudio
-                audioTracks.forEach(track => {
-                    track.src.play().catch(()=>{});
+                // Dar play nas faixas de som temporárias sincronizadas de exportação
+                tempAudios.forEach(item => {
+                    item.audio.play().catch(()=>{});
                 });
 
                 if (mediaFile && mediaFile.type === 'video' && mediaFile.src) {
@@ -2458,7 +2468,7 @@
                     elapsed += 250;
                     const percent = Math.min((elapsed / recordDuration) * 100, 100);
                     exportProgressBar.style.width = `${percent}%`;
-                    exportProgressText.innerText = `Gravando mixer: ${Math.floor(percent)}%`;
+                    exportProgressText.innerText = `Processando: ${Math.floor(percent)}%`;
 
                     if (elapsed >= recordDuration) {
                         clearInterval(progressInterval);
@@ -2471,11 +2481,11 @@
             } catch (err) {
                 console.error("Erro na gravação: ", err);
                 exportModal.classList.add('hidden');
-                showToast("Erro ao processar as faixas de áudio na gravação.", true);
+                showToast("Erro ao processar áudio na exportação.", true);
             }
         }
 
-        // --- TOASTS FEEDBACK ---
+        // --- TOASTS DE FEEDBACK ---
         function showToast(message, isError = false) {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -2499,11 +2509,11 @@
             }, 3000);
         }
 
-        // --- REGISTRO DO SERVICE WORKER (PWA) ---
+        // --- PWA SERVICE WORKER ---
         function registerStoryPWA() {
             if ('serviceWorker' in navigator) {
                 const swCode = `
-                    const CACHE_NAME = 'storycraft-pro-v2';
+                    const CACHE_NAME = 'storycraft-pro-v3';
                     const ASSETS = [
                         '/',
                         window.location.href
@@ -2530,8 +2540,8 @@
                 const swUrl = URL.createObjectURL(blob);
                 
                 navigator.serviceWorker.register(swUrl)
-                    .then(() => console.log("Service Worker do PWA registrado!"))
-                    .catch(err => console.warn("Erro no registro do SW do PWA", err));
+                    .then(() => console.log("SW registrado."))
+                    .catch(err => console.warn("Erro no SW", err));
             }
 
             let deferredPrompt;
@@ -2545,7 +2555,7 @@
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then((choiceResult) => {
                         if (choiceResult.outcome === 'accepted') {
-                            showToast("StoryCraft Studio Pro Instalado!");
+                            showToast("StoryCraft Instalado!");
                             pwaBtn.classList.add('hidden');
                         }
                         deferredPrompt = null;
